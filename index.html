@@ -142,8 +142,8 @@ Return ONLY a raw JSON object, no markdown, no backticks, no explanation. Struct
 Exactly 8 picks rated 4.0+. Mix: 3 recent (2022-2025), 3 classics not in library, 2 Indian/nonfiction. mood must be one of: Action-Packed, Psychological, Historical, Literary, Procedural, Political. cat must be one of: vince_flynn, michael_connelly, harlan_coben, david_baldacci, indian, spy_espionage, british_thriller, nonfiction, self_help. Do NOT suggest: Vince Flynn, Kyle Mills, Brad Thor, Mark Greaney, Michael Connelly, Harlan Coben, David Baldacci.`;
 
 function getTwoDayWindow() {
-  const epoch = Math.floor(Date.now() / (1000*60*60*48));
-  return { seed: epoch, nextRefresh: new Date((epoch+1)*1000*60*60*48) };
+  const epoch = Math.floor(Date.now() / (1000*60*60*168));
+  return { seed: epoch, nextRefresh: new Date((epoch+1)*1000*60*60*168) };
 }
 
 function StarRating({ rating }) {
@@ -685,6 +685,32 @@ function CountdownTimer({ nextRefresh }) {
 
 // ── Recommendations Tab ──
 
+function PickCard({ pick, index, onAddToLibrary }) {
+  const [added, setAdded] = useState(false);
+  const mc = MOOD_COLORS[pick.mood] || MOOD_COLORS["Action-Packed"];
+  const cc = CAT_COLORS[pick.cat] || CAT_COLORS.british_thriller;
+  const cat = CATEGORIES.find(c => c.id === pick.cat);
+  return (
+    React.createElement('div', { style: {background:"#faf9f7",border:`1px solid #d8d4cc`,borderLeft:`4px solid ${mc.accent}`,borderRadius:12,padding:"16px 18px",display:"flex",gap:14},}
+      , React.createElement('div', { style: {minWidth:28,height:28,borderRadius:"50%",background:mc.bg,border:`1.5px solid ${mc.accent}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:mc.accent,flexShrink:0},}, index+1)
+      , React.createElement('div', { style: {flex:1},}
+        , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginBottom:4},}
+          , React.createElement('span', { style: {fontSize:9,background:mc.bg,color:mc.accent,border:`1px solid ${mc.accent}40`,padding:"2px 8px",borderRadius:20,fontWeight:700,textTransform:"uppercase"},}, pick.mood)
+          , pick.nyt&&React.createElement('span', { style: {fontSize:8,background:"#8b2e2e",color:"#fff",padding:"2px 6px",borderRadius:20,fontWeight:800},}, "NYT")
+          , cat&&React.createElement('span', { style: {fontSize:9,background:cc.tag,color:cc.tagText,padding:"2px 7px",borderRadius:20},}, cat.emoji, " " , cat.label)
+        )
+        , React.createElement('div', { style: {fontSize:15,fontWeight:800,color:"#1e1e2a",marginBottom:2},}, pick.title)
+        , React.createElement('div', { style: {fontSize:11,color:"#7a7a8a",marginBottom:6},}, pick.author, " · "  , pick.year, " · "  , React.createElement('span', { style: {color:"#c08b20",fontWeight:700},}, "★ " , Number(pick.rating).toFixed(1)))
+        , React.createElement('div', { style: {fontSize:12,color:"#5a5a6a",fontStyle:"italic",marginBottom:10},}, "\"", pick.why, "\"")
+        , React.createElement('button', { onClick: ()=>{if(!added){onAddToLibrary({id:Date.now()+index,cat:pick.cat||"british_thriller",title:pick.title,author:pick.author,year:pick.year,rating:pick.rating,nyt:pick.nyt||false,tags:[pick.genre,pick.mood].filter(Boolean),read:false,wishlist:false});setAdded(true);}},
+          style: {background:added?"#e8e4dc":mc.accent,border:"none",borderRadius:8,padding:"6px 14px",color:added?"#9a9aaa":"#fff",fontWeight:700,cursor:added?"default":"pointer",fontSize:11},}
+          , added?"✓ Added":"+ Add to Library"
+        )
+      )
+    )
+  );
+}
+
 function RecommendationsTab({ onAddToLibrary }) {
   const win=useMemo(()=>getTwoDayWindow(),[]);
   const [data,setData]=useState(null);
@@ -714,7 +740,7 @@ function RecommendationsTab({ onAddToLibrary }) {
         , React.createElement('div', null
           , React.createElement('div', { style: {fontSize:9,color:"#6a4015",textTransform:"uppercase",letterSpacing:3,fontFamily:"monospace",fontWeight:700,marginBottom:6},}, "◆ CURATED FOR YOUR LIBRARY"    )
           , React.createElement('div', { style: {fontSize:20,fontWeight:900,color:"#1e1e2a"},}, _optionalChain([data, 'optionalAccess', _22 => _22.headline])||"Personalised Reading Picks")
-          , React.createElement('div', { style: {fontSize:12,color:"#9a9aaa",marginTop:3},}, "Based on your reading profile · Refreshes every 48 hours"         )
+          , React.createElement('div', { style: {fontSize:12,color:"#9a9aaa",marginTop:3},}, "Based on your reading profile · Refreshes every 7 days"         )
         )
         , React.createElement('div', { style: {background:"#edeae4",border:"1px solid #d0ccc4",borderRadius:12,padding:"10px 16px",textAlign:"right"},}
           , React.createElement('div', { style: {fontSize:9,color:"#9a9aaa",textTransform:"uppercase",letterSpacing:1.5,marginBottom:3},}, "Next refresh" )
@@ -743,31 +769,9 @@ function RecommendationsTab({ onAddToLibrary }) {
             , React.createElement('button', { onClick: ()=>loadRecs(true), style: {background:"none",border:"1px solid #d0ccc4",borderRadius:8,padding:"6px 14px",color:"#6a6a7a",fontSize:11,cursor:"pointer"},}, "↻ Refresh now"  )
           )
           , React.createElement('div', { style: {display:"flex",flexDirection:"column",gap:10},}
-            , (data.picks||[]).map((pick,i)=>{
-              const mc=MOOD_COLORS[pick.mood]||MOOD_COLORS["Action-Packed"];
-              const cc=CAT_COLORS[pick.cat]||CAT_COLORS.british_thriller;
-              const cat=CATEGORIES.find(c=>c.id===pick.cat);
-              const [added,setAdded]=useState(false);
-              return(
-                React.createElement('div', { key: i, style: {background:"#faf9f7",border:`1px solid #d8d4cc`,borderLeft:`4px solid ${mc.accent}`,borderRadius:12,padding:"16px 18px",display:"flex",gap:14},}
-                  , React.createElement('div', { style: {minWidth:28,height:28,borderRadius:"50%",background:mc.bg,border:`1.5px solid ${mc.accent}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:mc.accent,flexShrink:0},}, i+1)
-                  , React.createElement('div', { style: {flex:1},}
-                    , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginBottom:4},}
-                      , React.createElement('span', { style: {fontSize:9,background:mc.bg,color:mc.accent,border:`1px solid ${mc.accent}40`,padding:"2px 8px",borderRadius:20,fontWeight:700,textTransform:"uppercase"},}, pick.mood)
-                      , pick.nyt&&React.createElement('span', { style: {fontSize:8,background:"#8b2e2e",color:"#fff",padding:"2px 6px",borderRadius:20,fontWeight:800},}, "NYT")
-                      , cat&&React.createElement('span', { style: {fontSize:9,background:cc.tag,color:cc.tagText,padding:"2px 7px",borderRadius:20},}, cat.emoji, " " , cat.label)
-                    )
-                    , React.createElement('div', { style: {fontSize:15,fontWeight:800,color:"#1e1e2a",marginBottom:2},}, pick.title)
-                    , React.createElement('div', { style: {fontSize:11,color:"#7a7a8a",marginBottom:6},}, pick.author, " · "  , pick.year, " · "  , React.createElement('span', { style: {color:"#c08b20",fontWeight:700},}, "★ " , Number(pick.rating).toFixed(1)))
-                    , React.createElement('div', { style: {fontSize:12,color:"#5a5a6a",fontStyle:"italic",marginBottom:10},}, "\"", pick.why, "\"")
-                    , React.createElement('button', { onClick: ()=>{if(!added){onAddToLibrary({id:Date.now()+i,cat:pick.cat||"british_thriller",title:pick.title,author:pick.author,year:pick.year,rating:pick.rating,nyt:pick.nyt||false,tags:[pick.genre,pick.mood].filter(Boolean),read:false,wishlist:false});setAdded(true);}},
-                      style: {background:added?"#e8e4dc":mc.accent,border:"none",borderRadius:8,padding:"6px 14px",color:added?"#9a9aaa":"#fff",fontWeight:700,cursor:added?"default":"pointer",fontSize:11},}
-                      , added?"✓ Added":"+ Add to Library"
-                    )
-                  )
-                )
-              );
-            })
+            , (data.picks||[]).map((pick,i)=>(
+              React.createElement(PickCard, { key: i, pick: pick, index: i, onAddToLibrary: onAddToLibrary,})
+            ))
           )
           , data.spotlightAuthor&&(
             React.createElement('div', { style: {background:"linear-gradient(135deg,#f5efea 0%,#eeecf5 100%)",border:"1px solid #ccc8c0",borderTop:"3px solid #6a4015",borderRadius:14,padding:"20px 22px",marginTop:24},}
@@ -817,11 +821,13 @@ function LibraryTab({ books, setBooks }) {
   const toggleRead=id=>setBooks(bs=>bs.map(b=>b.id===id?{...b,read:!b.read}:b));
   const toggleWishlist=id=>setBooks(bs=>bs.map(b=>b.id===id?{...b,wishlist:!b.wishlist}:b));
   const deleteBook=async(id)=>{
-    setBooks(bs=>bs.filter(b=>b.id!==id));
-    if(user) {
-      // Mark as hidden in book_states so it stays hidden after refresh
-      await saveState(user.id, id, false, false, 0, {hidden: true});
-    }
+    // Coerce to same type for comparison (Supabase returns integers)
+    setBooks(bs=>bs.filter(b=>String(b.id)!==String(id)));
+    // Delete from books table (hard delete)
+    const {error} = await supabase.from('books').delete().eq('id', id);
+    if(error) console.error('Delete book error:', error.message);
+    // Also clean up any book_states entry
+    if(user) await deleteState(user.id, id);
   };
   const addBook=book=>{setBooks(bs=>[{...book,id:Date.now()+Math.random(),...(!book.read&&{read:false}),...(!book.wishlist&&{wishlist:false})},bs.filter(b=>b.title.toLowerCase()!==book.title.toLowerCase())].flat());setShowAI(false);setShowAdd(false);};
 
