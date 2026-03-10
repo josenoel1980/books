@@ -1,4 +1,4 @@
-const CACHE = 'book-library-v4';
+const CACHE = 'book-library-v6';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(cache => cache.add('./index.html').catch(()=>{})));
@@ -14,12 +14,14 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = e.request.url;
-  // Skip all external/API requests
-  if (!url.startsWith(self.location.origin) ||
-      url.includes('supabase') ||
+  // Only cache same-origin requests; skip ALL external APIs
+  if (!url.startsWith(self.location.origin)) return;
+  if (url.includes('supabase') ||
       url.includes('anthropic') ||
       url.includes('cdnjs') ||
       url.includes('jsdelivr') ||
-      url.includes('openlibrary')) return;
+      url.includes('googleapis') ||
+      url.includes('openlibrary') ||
+      url.includes('goodreads')) return;
   e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
 });
