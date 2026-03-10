@@ -211,13 +211,24 @@ function BookCover({ title, author, col }) {
   useEffect(() => {
     if (tried) return;
     setTried(true);
-    // Try Open Library cover by title+author search
+    // Try Google Books API first (most reliable)
     const q = encodeURIComponent(title + " " + author);
-    fetch(`https://openlibrary.org/search.json?q=${q}&limit=1&fields=cover_i`)
+    fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1&fields=items(volumeInfo/imageLinks)`)
       .then(r => r.json())
       .then(d => {
-        const coverId = _optionalChain([d, 'optionalAccess', _2 => _2.docs, 'optionalAccess', _3 => _3[0], 'optionalAccess', _4 => _4.cover_i]);
-        if (coverId) setSrc(`https://covers.openlibrary.org/b/id/${coverId}-M.jpg`);
+        const thumb = _optionalChain([d, 'optionalAccess', _2 => _2.items, 'optionalAccess', _3 => _3[0], 'optionalAccess', _4 => _4.volumeInfo, 'optionalAccess', _5 => _5.imageLinks, 'optionalAccess', _6 => _6.thumbnail]);
+        if (thumb) {
+          // Use https and zoom=1 for better quality
+          setSrc(thumb.replace('http:', 'https:').replace('zoom=1', 'zoom=2'));
+        } else {
+          // Fallback: Open Library
+          return fetch(`https://openlibrary.org/search.json?q=${q}&limit=1&fields=cover_i`)
+            .then(r => r.json())
+            .then(d2 => {
+              const coverId = _optionalChain([d2, 'optionalAccess', _7 => _7.docs, 'optionalAccess', _8 => _8[0], 'optionalAccess', _9 => _9.cover_i]);
+              if (coverId) setSrc(`https://covers.openlibrary.org/b/id/${coverId}-M.jpg`);
+            });
+        }
       })
       .catch(() => {});
   }, [title, author, tried]);
@@ -244,48 +255,45 @@ function BookCard({ book, onToggleRead, onToggleWishlist, onDelete }) {
     window.open(url,"goodreads","width="+w+",height="+h+",left="+left+",top="+top+",scrollbars=yes,resizable=yes");
   };
   return (
-    React.createElement('div', { style: {background:"#faf9f7",border:`1px solid ${col.border}`,borderTop:`3px solid ${col.accent}`,borderRadius:12,overflow:"hidden",transition:"transform .15s,box-shadow .15s",position:"relative",display:"flex",flexDirection:"column",boxShadow:"0 1px 3px rgba(0,0,0,.06)"},
-      onMouseEnter: e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="0 6px 20px rgba(0,0,0,.10)"},
-      onMouseLeave: e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 1px 3px rgba(0,0,0,.06)"},}
+    React.createElement('div', { style: {background:"#faf9f7",border:`1px solid ${col.border}`,borderLeft:`3px solid ${col.accent}`,borderRadius:8,overflow:"hidden",transition:"box-shadow .15s",position:"relative",display:"flex",flexDirection:"row",boxShadow:"0 1px 3px rgba(0,0,0,.06)",fontSize:"70%"},
+      onMouseEnter: e=>e.currentTarget.style.boxShadow="0 3px 12px rgba(0,0,0,.10)",
+      onMouseLeave: e=>e.currentTarget.style.boxShadow="0 1px 3px rgba(0,0,0,.06)",}
 
-      /* Cover thumbnail */
-      , React.createElement('div', { style: {height:160,overflow:"hidden",position:"relative",cursor:"pointer",flexShrink:0}, onClick: openGoodreads, title: "View on Goodreads"  ,}
+      /* Thumbnail - LHS small rectangle */
+      , React.createElement('div', { style: {width:52,flexShrink:0,overflow:"hidden",cursor:"pointer",position:"relative"}, onClick: openGoodreads, title: "View on Goodreads"  ,}
         , React.createElement(BookCover, { title: book.title, author: book.author, col: col,})
-        /* Badges overlay */
-        , React.createElement('div', { style: {position:"absolute",top:6,right:6,display:"flex",flexDirection:"column",gap:3,alignItems:"flex-end"},}
-          , book.nyt&&React.createElement('span', { style: {background:"#8b2e2e",color:"#fff",fontSize:8,padding:"2px 6px",borderRadius:20,fontWeight:800,boxShadow:"0 1px 4px rgba(0,0,0,.3)"},}, "NYT")
-          , book.read&&React.createElement('span', { style: {background:"#28622a",color:"#fff",fontSize:8,padding:"2px 6px",borderRadius:20,fontWeight:700,boxShadow:"0 1px 4px rgba(0,0,0,.3)"},}, "READ")
-          , book.wishlist&&!book.read&&React.createElement('span', { style: {background:"#8a4a18",color:"#fff",fontSize:8,padding:"2px 6px",borderRadius:20,fontWeight:700,boxShadow:"0 1px 4px rgba(0,0,0,.3)"},}, "LIST")
-        )
-        /* Year badge bottom-left */
-        , React.createElement('div', { style: {position:"absolute",bottom:6,left:6},}
-          , React.createElement('span', { style: {fontSize:9,background:"rgba(0,0,0,.55)",color:"#fff",padding:"2px 7px",borderRadius:10,fontWeight:600},}, book.year)
+        , React.createElement('div', { style: {position:"absolute",bottom:3,left:3},}
+          , React.createElement('span', { style: {fontSize:8,background:"rgba(0,0,0,.6)",color:"#fff",padding:"1px 4px",borderRadius:6,fontWeight:600},}, book.year)
         )
       )
 
       /* Details */
-      , React.createElement('div', { style: {padding:"10px 12px 0",flex:1},}
-        , React.createElement('div', { style: {fontSize:9,color:col.accent,textTransform:"uppercase",letterSpacing:1.2,fontFamily:"monospace",fontWeight:700,marginBottom:4},}, _optionalChain([cat, 'optionalAccess', _5 => _5.emoji]), " " , _optionalChain([cat, 'optionalAccess', _6 => _6.label]))
-        , React.createElement('div', { onClick: openGoodreads,
-          style: {fontSize:13,fontWeight:700,color:"#2c2c2c",lineHeight:1.25,marginBottom:3,cursor:"pointer",textDecoration:"underline",textDecorationColor:"#ccc8c0",textUnderlineOffset:3},
-          title: "Click to view on Goodreads"    ,}
-, book.title, " " , React.createElement('span', { style: {fontSize:9,color:"#9a9aaa",fontWeight:400},}, "↗"))
-        , React.createElement('div', { style: {display:"flex",flexWrap:"wrap",gap:4,marginBottom:6},}
-          , book.genre&&React.createElement('span', { style: {fontSize:9,background:col.tag,color:col.accent,padding:"2px 7px",borderRadius:20,fontWeight:700,border:`1px solid ${col.border}`},}, book.genre)
-          , book.standalone&&React.createElement('span', { style: {fontSize:9,background:"#e8f0fe",color:"#2a5bb5",padding:"2px 7px",borderRadius:20,fontWeight:700,border:"1px solid #b8cff0"},}, "📖 Standalone" )
+      , React.createElement('div', { style: {flex:1,padding:"6px 8px",display:"flex",flexDirection:"column",gap:2,minWidth:0},}
+        , React.createElement('div', { style: {display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:4},}
+          , React.createElement('div', { style: {minWidth:0},}
+            , React.createElement('div', { onClick: openGoodreads, style: {fontSize:11,fontWeight:700,color:"#2c2c2c",lineHeight:1.2,cursor:"pointer",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}, title: book.title,}
+              , book.title, " " , React.createElement('span', { style: {fontSize:8,color:"#9a9aaa",fontWeight:400},}, "↗")
+            )
+            , React.createElement('div', { style: {fontSize:9,color:"#888",marginTop:1},}, book.author)
+          )
+          , React.createElement('button', { onClick: ()=>onDelete(book.id), style: {flexShrink:0,background:"none",border:"none",color:"#c8c8d0",cursor:"pointer",fontSize:13,padding:"0 2px",lineHeight:1},
+            onMouseEnter: e=>e.currentTarget.style.color="#b04040", onMouseLeave: e=>e.currentTarget.style.color="#c8c8d0",}, "×")
         )
-        , React.createElement(StarRating, { rating: book.rating,})
-        , React.createElement('div', { style: {display:"flex",flexWrap:"wrap",gap:3,margin:"6px 0 10px"},}
-          , (book.tags||[]).slice(0,3).map(t=>React.createElement('span', { key: t, style: {background:col.tag,color:col.tagText,fontSize:9,padding:"2px 6px",borderRadius:20,fontWeight:500},}, t))
-        )
-      )
 
-      /* Actions */
-      , React.createElement('div', { style: {display:"flex",borderTop:`1px solid ${col.border}`},}
-        , React.createElement('button', { onClick: ()=>onToggleRead(book.id), style: {flex:1,padding:"8px 0",background:book.read?"#edf5ee":"none",border:"none",color:book.read?"#28622a":"#a0a0b0",cursor:"pointer",fontSize:11,fontWeight:600},}, book.read?"✓ Read":"Mark Read")
-        , React.createElement('button', { onClick: ()=>onToggleWishlist(book.id), style: {flex:1,padding:"8px 0",background:book.wishlist?"#f5ede8":"none",border:"none",borderLeft:`1px solid ${col.border}`,borderRight:`1px solid ${col.border}`,color:book.wishlist?"#8a4a18":"#a0a0b0",cursor:"pointer",fontSize:11,fontWeight:600},}, book.wishlist?"♥ Listed":"+ Wishlist")
-        , React.createElement('button', { onClick: ()=>onDelete(book.id), style: {width:32,background:"none",border:"none",color:"#c8c8d0",cursor:"pointer",fontSize:14},
-          onMouseEnter: e=>e.currentTarget.style.color="#b04040", onMouseLeave: e=>e.currentTarget.style.color="#c8c8d0",}, "×")
+        , React.createElement('div', { style: {display:"flex",flexWrap:"wrap",gap:2,alignItems:"center"},}
+          , book.genre&&React.createElement('span', { style: {fontSize:8,background:col.tag,color:col.accent,padding:"1px 5px",borderRadius:20,fontWeight:700,border:`1px solid ${col.border}`},}, book.genre)
+          , book.standalone&&React.createElement('span', { style: {fontSize:8,background:"#e8f0fe",color:"#2a5bb5",padding:"1px 5px",borderRadius:20,fontWeight:700,border:"1px solid #b8cff0"},}, "📖")
+          , book.nyt&&React.createElement('span', { style: {background:"#8b2e2e",color:"#fff",fontSize:8,padding:"1px 5px",borderRadius:20,fontWeight:800},}, "NYT")
+          , book.read&&React.createElement('span', { style: {background:"#28622a",color:"#fff",fontSize:8,padding:"1px 5px",borderRadius:20,fontWeight:700},}, "✓")
+          , book.wishlist&&!book.read&&React.createElement('span', { style: {background:"#8a4a18",color:"#fff",fontSize:8,padding:"1px 5px",borderRadius:20,fontWeight:700},}, "♥")
+        )
+
+        , React.createElement(StarRating, { rating: book.rating,})
+
+        , React.createElement('div', { style: {display:"flex",gap:4,marginTop:2},}
+          , React.createElement('button', { onClick: ()=>onToggleRead(book.id), style: {flex:1,padding:"3px 0",background:book.read?"#edf5ee":"none",border:`1px solid ${col.border}`,borderRadius:4,color:book.read?"#28622a":"#a0a0b0",cursor:"pointer",fontSize:9,fontWeight:600},}, book.read?"✓ Read":"Mark Read")
+          , React.createElement('button', { onClick: ()=>onToggleWishlist(book.id), style: {flex:1,padding:"3px 0",background:book.wishlist?"#f5ede8":"none",border:`1px solid ${col.border}`,borderRadius:4,color:book.wishlist?"#8a4a18":"#a0a0b0",cursor:"pointer",fontSize:9,fontWeight:600},}, book.wishlist?"♥ List":"+ List")
+        )
       )
     )
   );
@@ -338,7 +346,7 @@ function AddBookModal({ onClose, onAdd, existingBooks }) {
   const [error,setError]=useState("");
   const [added,setAdded]=useState(false);
   const inputRef=useRef(null);
-  useEffect(()=>{setTimeout(()=>_optionalChain([inputRef, 'access', _7 => _7.current, 'optionalAccess', _8 => _8.focus, 'call', _9 => _9()]),80);},[]);
+  useEffect(()=>{setTimeout(()=>_optionalChain([inputRef, 'access', _10 => _10.current, 'optionalAccess', _11 => _11.focus, 'call', _12 => _12()]),80);},[]);
 
   const fetchDetails=async()=>{
     const title=titleInput.trim();
@@ -399,7 +407,7 @@ Your response must start with { and end with }. Nothing before or after.`;
             , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginBottom:8},}
               , cat&&React.createElement('span', { style: {fontSize:9,color:col.accent,textTransform:"uppercase",letterSpacing:1.5,fontFamily:"monospace",fontWeight:700},}, cat.emoji, " " , cat.label)
               , React.createElement('span', { style: {fontSize:9,background:col.tag,color:col.tagText,padding:"1px 6px",borderRadius:10,fontWeight:600},}, preview.year)
-              , preview.nyt&&React.createElement('span', { style: {background:"#8b2e2e",color:"#fff",fontSize:8,padding:"2px 6px",borderRadius:20,fontWeight:800},}, "NYT")
+              , preview.nyt&&React.createElement('span', { style: {background:"#8b2e2e",color:"#fff",fontSize:7,padding:"2px 5px",borderRadius:20,fontWeight:800},}, "NYT")
               , preview.series&&React.createElement('span', { style: {fontSize:9,color:"#9a9aaa",background:"#ede9e2",padding:"2px 8px",borderRadius:20},}, preview.series)
             )
             , React.createElement('div', { style: {fontSize:18,fontWeight:900,color:"#1e1e2a",lineHeight:1.2,marginBottom:3},}, preview.title)
@@ -434,7 +442,7 @@ function AddAuthorModal({ onClose, onAddAll, existingBooks }) {
   const [adding, setAdding]     = useState(false);
   const [done, setDone]         = useState(false);
   const inputRef = useRef(null);
-  useEffect(()=>{ setTimeout(()=>_optionalChain([inputRef, 'access', _10 => _10.current, 'optionalAccess', _11 => _11.focus, 'call', _12 => _12()]),100); },[]);
+  useEffect(()=>{ setTimeout(()=>_optionalChain([inputRef, 'access', _13 => _13.current, 'optionalAccess', _14 => _14.focus, 'call', _15 => _15()]),100); },[]);
 
   const existingTitles = useMemo(()=>new Set(existingBooks.map(b=>b.title.toLowerCase())),[existingBooks]);
 
@@ -494,7 +502,7 @@ Return the complete list sorted by year ascending.`;
     setAdding(false);
   };
 
-  const newCount = results ? [...selected].filter(i=>!existingTitles.has(_optionalChain([results, 'access', _13 => _13[i], 'optionalAccess', _14 => _14.title, 'optionalAccess', _15 => _15.toLowerCase, 'call', _16 => _16()]))).length : 0;
+  const newCount = results ? [...selected].filter(i=>!existingTitles.has(_optionalChain([results, 'access', _16 => _16[i], 'optionalAccess', _17 => _17.title, 'optionalAccess', _18 => _18.toLowerCase, 'call', _19 => _19()]))).length : 0;
   const alreadyCount = results ? results.filter(b=>existingTitles.has(b.title.toLowerCase())).length : 0;
 
   return (
@@ -648,7 +656,7 @@ Start with [ end with ]. Nothing else.`;
               , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"start"},}
                 , React.createElement('div', { style: {flex:1},}
                   , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,marginBottom:3},}
-                    , React.createElement('span', { style: {fontSize:10,color:col.accent,fontWeight:700},}, _optionalChain([cat, 'optionalAccess', _17 => _17.emoji]), " " , _optionalChain([cat, 'optionalAccess', _18 => _18.label]))
+                    , React.createElement('span', { style: {fontSize:10,color:col.accent,fontWeight:700},}, _optionalChain([cat, 'optionalAccess', _20 => _20.emoji]), " " , _optionalChain([cat, 'optionalAccess', _21 => _21.label]))
                     , book.nyt&&React.createElement('span', { style: {background:"#8b2e2e",color:"#fff",fontSize:8,padding:"1px 5px",borderRadius:10,fontWeight:800},}, "NYT")
                     , React.createElement('span', { style: {background:col.tag,color:col.tagText,fontSize:9,padding:"1px 6px",borderRadius:10},}, book.year)
                   )
@@ -706,7 +714,7 @@ function RecommendationsTab({ onAddToLibrary }) {
       , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12,marginBottom:22},}
         , React.createElement('div', null
           , React.createElement('div', { style: {fontSize:9,color:"#6a4015",textTransform:"uppercase",letterSpacing:3,fontFamily:"monospace",fontWeight:700,marginBottom:6},}, "◆ CURATED FOR YOUR LIBRARY"    )
-          , React.createElement('div', { style: {fontSize:20,fontWeight:900,color:"#1e1e2a"},}, _optionalChain([data, 'optionalAccess', _19 => _19.headline])||"Personalised Reading Picks")
+          , React.createElement('div', { style: {fontSize:20,fontWeight:900,color:"#1e1e2a"},}, _optionalChain([data, 'optionalAccess', _22 => _22.headline])||"Personalised Reading Picks")
           , React.createElement('div', { style: {fontSize:12,color:"#9a9aaa",marginTop:3},}, "Based on your reading profile · Refreshes every 48 hours"         )
         )
         , React.createElement('div', { style: {background:"#edeae4",border:"1px solid #d0ccc4",borderRadius:12,padding:"10px 16px",textAlign:"right"},}
@@ -809,7 +817,12 @@ function LibraryTab({ books, setBooks }) {
   const catCounts=useMemo(()=>Object.fromEntries(CATEGORIES.map(c=>[c.id,books.filter(b=>b.cat===c.id).length])),[books]);
   const toggleRead=id=>setBooks(bs=>bs.map(b=>b.id===id?{...b,read:!b.read}:b));
   const toggleWishlist=id=>setBooks(bs=>bs.map(b=>b.id===id?{...b,wishlist:!b.wishlist}:b));
-  const deleteBook=id=>setBooks(bs=>bs.filter(b=>b.id!==id));
+  const deleteBook=async(id)=>{
+    setBooks(bs=>bs.filter(b=>b.id!==id));
+    // Remove from Supabase books table (for user-added books) and book_states
+    if(user) await deleteState(user.id, id);
+    await supabase.from('books').delete().eq('id', id);
+  };
   const addBook=book=>{setBooks(bs=>[{...book,id:Date.now()+Math.random(),...(!book.read&&{read:false}),...(!book.wishlist&&{wishlist:false})},bs.filter(b=>b.title.toLowerCase()!==book.title.toLowerCase())].flat());setShowAI(false);setShowAdd(false);};
 
   // Add a full author's books — inserts into DB books table then merges into state
@@ -1079,8 +1092,8 @@ function App() {
         .select('*')
         .order('id');
       if (error) {
-        console.error('Supabase error:', JSON.stringify(error), _optionalChain([error, 'optionalAccess', _20 => _20.message]), _optionalChain([error, 'optionalAccess', _21 => _21.code]), _optionalChain([error, 'optionalAccess', _22 => _22.details]), _optionalChain([error, 'optionalAccess', _23 => _23.hint]));
-        throw new Error(_optionalChain([error, 'optionalAccess', _24 => _24.message]) || _optionalChain([error, 'optionalAccess', _25 => _25.code]) || JSON.stringify(error));
+        console.error('Supabase error:', JSON.stringify(error), _optionalChain([error, 'optionalAccess', _23 => _23.message]), _optionalChain([error, 'optionalAccess', _24 => _24.code]), _optionalChain([error, 'optionalAccess', _25 => _25.details]), _optionalChain([error, 'optionalAccess', _26 => _26.hint]));
+        throw new Error(_optionalChain([error, 'optionalAccess', _27 => _27.message]) || _optionalChain([error, 'optionalAccess', _28 => _28.code]) || JSON.stringify(error));
       }
       if (!data || data.length === 0) {
         console.warn('Books table returned 0 rows — check RLS policy allows anon select');
@@ -1090,7 +1103,7 @@ function App() {
       setBooksLoading(false);
       return window._BASE_BOOKS;
     } catch(e) {
-      console.error('Failed to load books:', _optionalChain([e, 'optionalAccess', _26 => _26.message]) || e);
+      console.error('Failed to load books:', _optionalChain([e, 'optionalAccess', _29 => _29.message]) || e);
       window._BASE_BOOKS = [];
       setBooksLoading(false);
       return [];
@@ -1104,14 +1117,14 @@ function App() {
   useEffect(()=>{
     supabase.auth.getSession().then(async({data:{session}})=>{
       const baseBooks = await loadBaseBooks();
-      if(_optionalChain([session, 'optionalAccess', _27 => _27.user])){
+      if(_optionalChain([session, 'optionalAccess', _30 => _30.user])){
         setUser(session.user);
         await mergeUserStates(session.user.id, baseBooks);
       }
       setAuthLoading(false);
     });
     const {data:{subscription}}=supabase.auth.onAuthStateChange(async(_,session)=>{
-      if(_optionalChain([session, 'optionalAccess', _28 => _28.user])){
+      if(_optionalChain([session, 'optionalAccess', _31 => _31.user])){
         setUser(session.user);
         const baseBooks = window._BASE_BOOKS||[];
         await mergeUserStates(session.user.id, baseBooks);
@@ -1127,12 +1140,12 @@ function App() {
     setSyncing(true);
     const books = baseBooks && baseBooks.length ? baseBooks : (window._BASE_BOOKS||[]);
     const saved=await loadStates(userId);
-    const extraBooks=Object.values(saved).filter(r=>_optionalChain([r, 'access', _29 => _29.extra_data, 'optionalAccess', _30 => _30.isExtra])).map(r=>r.extra_data.book).filter(Boolean);
+    const extraBooks=Object.values(saved).filter(r=>_optionalChain([r, 'access', _32 => _32.extra_data, 'optionalAccess', _33 => _33.isExtra])).map(r=>r.extra_data.book).filter(Boolean);
     const base=books.map(b=>({
       ...b,
-      read:_optionalChain([saved, 'access', _31 => _31[String(b.id)], 'optionalAccess', _32 => _32.read])||false,
-      wishlist:_optionalChain([saved, 'access', _33 => _33[String(b.id)], 'optionalAccess', _34 => _34.wishlist])||false,
-      rating:_optionalChain([saved, 'access', _35 => _35[String(b.id)], 'optionalAccess', _36 => _36.rating])||b.rating,
+      read:_optionalChain([saved, 'access', _34 => _34[String(b.id)], 'optionalAccess', _35 => _35.read])||false,
+      wishlist:_optionalChain([saved, 'access', _36 => _36[String(b.id)], 'optionalAccess', _37 => _37.wishlist])||false,
+      rating:_optionalChain([saved, 'access', _38 => _38[String(b.id)], 'optionalAccess', _39 => _39.rating])||b.rating,
     }));
     const titles=new Set(base.map(b=>b.title.toLowerCase()));
     const newBooks=extraBooks.filter(b=>!titles.has(b.title.toLowerCase()));
