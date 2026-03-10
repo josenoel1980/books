@@ -45,7 +45,7 @@ body { background: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 
 
 
-<script type="text/babel" data-presets="react,env">
+<script type="text/plain" id="jsx-source">
 const { useState, useMemo, useRef, useEffect } = React;
 
 // ── Supabase ──
@@ -345,8 +345,7 @@ function AuthorDropdown({ books, selectedAuthor, onChange }) {
     </div>
   );
 }
-</script>
-<script type="text/babel" data-presets="react,env">
+
 // ── Add Book Modal ──
 function AddBookModal({ onClose, onAdd, existingBooks }) {
   const [titleInput,setTitleInput]=useState("");
@@ -440,8 +439,7 @@ Your response must start with { and end with }. Nothing before or after.`;
     </div>
   );
 }
-</script>
-<script type="text/babel" data-presets="react,env">
+
 // ── Add Author Modal ──
 function AddAuthorModal({ onClose, onAddAll, existingBooks }) {
   const [query, setQuery]       = useState("");
@@ -620,8 +618,7 @@ Return the complete list sorted by year ascending.`;
 }
 
 // ── AI Discover Modal ──
-</script>
-<script type="text/babel" data-presets="react,env">
+
 function AIModal({ onClose, onAdd }) {
   const [loading,setLoading]=useState(false);
   const [results,setResults]=useState([]);
@@ -696,8 +693,7 @@ function CountdownTimer({ nextRefresh }) {
 }
 
 // ── Recommendations Tab ──
-</script>
-<script type="text/babel" data-presets="react,env">
+
 function RecommendationsTab({ onAddToLibrary }) {
   const win=useMemo(()=>getTwoDayWindow(),[]);
   const [data,setData]=useState(null);
@@ -1080,8 +1076,7 @@ function ApiKeyBanner() {
     </div>
   );
 }
-</script>
-<script type="text/babel" data-presets="react,env">
+
 function App() {
   const [activeTab,setActiveTab]=useState("library");
   const [user,setUser]=useState(null);
@@ -1225,6 +1220,29 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+<script>
+// Manually compile JSX after all scripts load - Safari compatible
+function runApp() {
+  try {
+    var src = document.getElementById('jsx-source').textContent;
+    var compiled = Babel.transform(src, {
+      presets: [['react'], ['env', {targets: {browsers: ['last 2 versions', 'safari >= 12']}}]]
+    }).code;
+    var script = document.createElement('script');
+    script.textContent = compiled;
+    document.head.appendChild(script);
+  } catch(e) {
+    document.getElementById('root').innerHTML = '<div style="padding:40px;text-align:center;font-family:sans-serif"><h2>⚠️ Load Error</h2><pre style="background:#f5f5f5;padding:16px;border-radius:8px;text-align:left;overflow:auto;font-size:11px">' + e.message + '</pre></div>';
+    console.error('Babel compile error:', e);
+  }
+}
+// Wait for Babel to load
+if (typeof Babel !== 'undefined') {
+  runApp();
+} else {
+  document.querySelector('script[src*="babel"]').addEventListener('load', runApp);
+}
 </script>
 <script>
 if ('serviceWorker' in navigator) {
