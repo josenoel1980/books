@@ -177,8 +177,7 @@ function AuthorSection({ author, abooks, col, readCount, pct, onToggleRead, onTo
         /* Chevron */
         , React.createElement('div', { style: {fontSize:11,color:col.accent,transition:"transform .2s",transform:collapsed?"rotate(-90deg)":"rotate(0deg)",flexShrink:0},}, "▼")
 
-        /* Author name */
-        , React.createElement('div', { style: {fontSize:14,fontWeight:800,color:"#2c2c3a",letterSpacing:-0.3,flex:1},}, author)
+
 
         /* Stats row */
         , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:8,flexShrink:0},}
@@ -274,7 +273,7 @@ function BookCard({ book, onToggleRead, onToggleWishlist, onDelete }) {
             , React.createElement('div', { onClick: openGoodreads, style: {fontSize:11,fontWeight:700,color:"#2c2c2c",lineHeight:1.2,cursor:"pointer",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}, title: book.title,}
               , book.title, " " , React.createElement('span', { style: {fontSize:8,color:"#9a9aaa",fontWeight:400},}, "↗")
             )
-            , React.createElement('div', { style: {fontSize:9,color:"#888",marginTop:1},}, book.author)
+
           )
           , React.createElement('button', { onClick: ()=>onDelete(book.id), style: {flexShrink:0,background:"none",border:"none",color:"#c8c8d0",cursor:"pointer",fontSize:13,padding:"0 2px",lineHeight:1},
             onMouseEnter: e=>e.currentTarget.style.color="#b04040", onMouseLeave: e=>e.currentTarget.style.color="#c8c8d0",}, "×")
@@ -819,9 +818,10 @@ function LibraryTab({ books, setBooks }) {
   const toggleWishlist=id=>setBooks(bs=>bs.map(b=>b.id===id?{...b,wishlist:!b.wishlist}:b));
   const deleteBook=async(id)=>{
     setBooks(bs=>bs.filter(b=>b.id!==id));
-    // Remove from Supabase books table (for user-added books) and book_states
-    if(user) await deleteState(user.id, id);
-    await supabase.from('books').delete().eq('id', id);
+    if(user) {
+      // Mark as hidden in book_states so it stays hidden after refresh
+      await saveState(user.id, id, false, false, 0, {hidden: true});
+    }
   };
   const addBook=book=>{setBooks(bs=>[{...book,id:Date.now()+Math.random(),...(!book.read&&{read:false}),...(!book.wishlist&&{wishlist:false})},bs.filter(b=>b.title.toLowerCase()!==book.title.toLowerCase())].flat());setShowAI(false);setShowAdd(false);};
 
@@ -1141,14 +1141,16 @@ function App() {
     const books = baseBooks && baseBooks.length ? baseBooks : (window._BASE_BOOKS||[]);
     const saved=await loadStates(userId);
     const extraBooks=Object.values(saved).filter(r=>_optionalChain([r, 'access', _32 => _32.extra_data, 'optionalAccess', _33 => _33.isExtra])).map(r=>r.extra_data.book).filter(Boolean);
-    const base=books.map(b=>({
-      ...b,
-      read:_optionalChain([saved, 'access', _34 => _34[String(b.id)], 'optionalAccess', _35 => _35.read])||false,
-      wishlist:_optionalChain([saved, 'access', _36 => _36[String(b.id)], 'optionalAccess', _37 => _37.wishlist])||false,
-      rating:_optionalChain([saved, 'access', _38 => _38[String(b.id)], 'optionalAccess', _39 => _39.rating])||b.rating,
-    }));
+    const base=books
+      .filter(b=>!_optionalChain([saved, 'access', _34 => _34[String(b.id)], 'optionalAccess', _35 => _35.extra_data, 'optionalAccess', _36 => _36.hidden]))
+      .map(b=>({
+        ...b,
+        read:_optionalChain([saved, 'access', _37 => _37[String(b.id)], 'optionalAccess', _38 => _38.read])||false,
+        wishlist:_optionalChain([saved, 'access', _39 => _39[String(b.id)], 'optionalAccess', _40 => _40.wishlist])||false,
+        rating:_optionalChain([saved, 'access', _41 => _41[String(b.id)], 'optionalAccess', _42 => _42.rating])||b.rating,
+      }));
     const titles=new Set(base.map(b=>b.title.toLowerCase()));
-    const newBooks=extraBooks.filter(b=>!titles.has(b.title.toLowerCase()));
+    const newBooks=extraBooks.filter(b=>!titles.has(b.title.toLowerCase()) && !_optionalChain([saved, 'access', _43 => _43[String(b.id)], 'optionalAccess', _44 => _44.extra_data, 'optionalAccess', _45 => _45.hidden]));
     setBooks([...newBooks,...base]);
     setSyncing(false);
   };
