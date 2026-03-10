@@ -1072,6 +1072,7 @@ function App() {
   // ── Load base books from Supabase ──
   const loadBaseBooks = async () => {
     setBooksLoading(true);
+    window._BASE_BOOKS = window._BASE_BOOKS || [];
     try {
       const { data, error } = await supabase
         .from('books')
@@ -1086,15 +1087,14 @@ function App() {
       }
       window._BASE_BOOKS = data || [];
       setBooks((data||[]).map(b=>({...b, tags: Array.isArray(b.tags)?b.tags:(b.tags||[]), read:false, wishlist:false})));
+      setBooksLoading(false);
+      return window._BASE_BOOKS;
     } catch(e) {
       console.error('Failed to load books:', _optionalChain([e, 'optionalAccess', _26 => _26.message]) || e);
-      setBooksLoading(false);
-      // Show error to user
-      alert('Could not load books from database.\n\nError: ' + (_optionalChain([e, 'optionalAccess', _27 => _27.message]) || JSON.stringify(e)) + '\n\nCheck Supabase RLS policy allows anon SELECT on books table.');
       window._BASE_BOOKS = [];
-      return;
+      setBooksLoading(false);
+      return [];
     }
-    setBooksLoading(false);
   };
 
   // Load books on first mount
@@ -1103,41 +1103,40 @@ function App() {
   // Check auth on mount + listen for changes
   useEffect(()=>{
     supabase.auth.getSession().then(async({data:{session}})=>{
-      if(_optionalChain([session, 'optionalAccess', _28 => _28.user])){
+      const baseBooks = await loadBaseBooks();
+      if(_optionalChain([session, 'optionalAccess', _27 => _27.user])){
         setUser(session.user);
-        await loadBaseBooks();
-        loadAndMerge(session.user.id);
-      } else {
-        await loadBaseBooks();
+        await mergeUserStates(session.user.id, baseBooks);
       }
       setAuthLoading(false);
     });
-    const {data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
-      if(_optionalChain([session, 'optionalAccess', _29 => _29.user])){ setUser(session.user); loadAndMerge(session.user.id); }
-      else{ setUser(null); loadBaseBooks(); }
+    const {data:{subscription}}=supabase.auth.onAuthStateChange(async(_,session)=>{
+      if(_optionalChain([session, 'optionalAccess', _28 => _28.user])){
+        setUser(session.user);
+        const baseBooks = window._BASE_BOOKS||[];
+        await mergeUserStates(session.user.id, baseBooks);
+      } else {
+        setUser(null);
+        setBooks((window._BASE_BOOKS||[]).map(b=>({...b,read:false,wishlist:false})));
+      }
     });
     return ()=>subscription.unsubscribe();
   },[]);
 
-  const loadAndMerge=async(userId)=>{
+  const mergeUserStates=async(userId, baseBooks)=>{
     setSyncing(true);
-    // Wait for base books to load if not ready yet
-    if(!window._BASE_BOOKS || window._BASE_BOOKS.length === 0) {
-      await loadBaseBooks();
-    }
+    const books = baseBooks && baseBooks.length ? baseBooks : (window._BASE_BOOKS||[]);
     const saved=await loadStates(userId);
-    setBooks(()=>{
-      const extraBooks=Object.values(saved).filter(r=>_optionalChain([r, 'access', _30 => _30.extra_data, 'optionalAccess', _31 => _31.isExtra])).map(r=>r.extra_data.book).filter(Boolean);
-      const base=(window._BASE_BOOKS||[]).map(b=>({
-        ...b,
-        read:_optionalChain([saved, 'access', _32 => _32[String(b.id)], 'optionalAccess', _33 => _33.read])||false,
-        wishlist:_optionalChain([saved, 'access', _34 => _34[String(b.id)], 'optionalAccess', _35 => _35.wishlist])||false,
-        rating:_optionalChain([saved, 'access', _36 => _36[String(b.id)], 'optionalAccess', _37 => _37.rating])||b.rating,
-      }));
-      const titles=new Set(base.map(b=>b.title.toLowerCase()));
-      const newBooks=extraBooks.filter(b=>!titles.has(b.title.toLowerCase()));
-      return [...newBooks,...base];
-    });
+    const extraBooks=Object.values(saved).filter(r=>_optionalChain([r, 'access', _29 => _29.extra_data, 'optionalAccess', _30 => _30.isExtra])).map(r=>r.extra_data.book).filter(Boolean);
+    const base=books.map(b=>({
+      ...b,
+      read:_optionalChain([saved, 'access', _31 => _31[String(b.id)], 'optionalAccess', _32 => _32.read])||false,
+      wishlist:_optionalChain([saved, 'access', _33 => _33[String(b.id)], 'optionalAccess', _34 => _34.wishlist])||false,
+      rating:_optionalChain([saved, 'access', _35 => _35[String(b.id)], 'optionalAccess', _36 => _36.rating])||b.rating,
+    }));
+    const titles=new Set(base.map(b=>b.title.toLowerCase()));
+    const newBooks=extraBooks.filter(b=>!titles.has(b.title.toLowerCase()));
+    setBooks([...newBooks,...base]);
     setSyncing(false);
   };
 
