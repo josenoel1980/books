@@ -1,0 +1,14 @@
+{
+  "name": "My Book Library",
+  "short_name": "Book Library",
+  "description": "Personal reading vault — track your fiction thriller collection",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f0ede8",
+  "theme_color": "#f5f2ee",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
