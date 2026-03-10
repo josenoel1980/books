@@ -20,33 +20,17 @@
 <style>
   body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script>
-// Suppress Babel in-browser transformer warning before Babel loads
-const _warn = console.warn.bind(console);
-console.warn = (...args) => {
-  if (args[0] && typeof args[0] === 'string' && args[0].includes('Babel')) return;
-  _warn(...args);
-};
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
-::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f0ede8; } ::-webkit-scrollbar-thumb { background: #ccc8c0; border-radius: 3px; }
-</style>
 </head>
 <body>
 <div id="root"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-
-<script type="text/plain" id="jsx-source">
-const { useState, useMemo, useRef, useEffect } = React;
+<script>
+{
+function _optionalChain(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) { return undefined; } if (op === 'access' || op === 'optionalAccess') { lastAccessLHS = value; value = fn(value); } else if (op === 'call' || op === 'optionalCall') { value = fn((...args) => value.call(lastAccessLHS, ...args)); lastAccessLHS = undefined; } } return value; }const { useState, useMemo, useRef, useEffect } = React;
 
 // ── Supabase ──
 const SUPA_URL = "https://kghwmhmcinervgziwpdk.supabase.co";
@@ -165,59 +149,59 @@ function getTwoDayWindow() {
 function StarRating({ rating }) {
   const full = Math.floor(rating), half = rating % 1 >= 0.5;
   return (
-    <div style={{display:"flex",alignItems:"center",gap:2}}>
-      {[1,2,3,4,5].map(i=>(
-        <span key={i} style={{fontSize:12,color:i<=full?"#c08b20":i===full+1&&half?"#c08b20":"#ccc"}}>
-          {i<=full?"★":i===full+1&&half?"⯨":"☆"}
-        </span>
-      ))}
-      <span style={{fontSize:11,color:"#8a8fa8",marginLeft:3}}>{Number(rating).toFixed(1)}</span>
-    </div>
+    React.createElement('div', { style: {display:"flex",alignItems:"center",gap:2},}
+      , [1,2,3,4,5].map(i=>(
+        React.createElement('span', { key: i, style: {fontSize:12,color:i<=full?"#c08b20":i===full+1&&half?"#c08b20":"#ccc"},}
+          , i<=full?"★":i===full+1&&half?"⯨":"☆"
+        )
+      ))
+      , React.createElement('span', { style: {fontSize:11,color:"#8a8fa8",marginLeft:3},}, Number(rating).toFixed(1))
+    )
   );
 }
 
 function AuthorSection({ author, abooks, col, readCount, pct, onToggleRead, onToggleWishlist, onDelete }) {
   const [collapsed, setCollapsed] = useState(false);
   return (
-    <div style={{marginBottom:28}}>
-      {/* Author header — click to expand/collapse */}
-      <div
-        onClick={()=>setCollapsed(c=>!c)}
-        style={{display:"flex",alignItems:"center",gap:10,marginBottom:collapsed?0:14,cursor:"pointer",userSelect:"none",padding:"8px 10px",borderRadius:10,transition:"background .12s"}}
-        onMouseEnter={e=>e.currentTarget.style.background="#ede9e3"}
-        onMouseLeave={e=>e.currentTarget.style.background="transparent"}
-      >
-        {/* Accent bar */}
-        <div style={{width:3,height:20,background:col.accent,borderRadius:2,flexShrink:0}}/>
+    React.createElement('div', { style: {marginBottom:28},}
+      /* Author header — click to expand/collapse */
+      , React.createElement('div', {
+        onClick: ()=>setCollapsed(c=>!c),
+        style: {display:"flex",alignItems:"center",gap:10,marginBottom:collapsed?0:14,cursor:"pointer",userSelect:"none",padding:"8px 10px",borderRadius:10,transition:"background .12s"},
+        onMouseEnter: e=>e.currentTarget.style.background="#ede9e3",
+        onMouseLeave: e=>e.currentTarget.style.background="transparent",}
 
-        {/* Chevron */}
-        <div style={{fontSize:11,color:col.accent,transition:"transform .2s",transform:collapsed?"rotate(-90deg)":"rotate(0deg)",flexShrink:0}}>▼</div>
+        /* Accent bar */
+        , React.createElement('div', { style: {width:3,height:20,background:col.accent,borderRadius:2,flexShrink:0},})
 
-        {/* Author name */}
-        <div style={{fontSize:14,fontWeight:800,color:"#2c2c3a",letterSpacing:-0.3,flex:1}}>{author}</div>
+        /* Chevron */
+        , React.createElement('div', { style: {fontSize:11,color:col.accent,transition:"transform .2s",transform:collapsed?"rotate(-90deg)":"rotate(0deg)",flexShrink:0},}, "▼")
 
-        {/* Stats row */}
-        <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-          {/* Progress bar */}
-          <div style={{width:60,height:5,background:"#e0dbd4",borderRadius:4,overflow:"hidden"}}>
-            <div style={{width:`${pct}%`,height:"100%",background:col.accent,borderRadius:4,transition:"width .3s"}}/>
-          </div>
-          <span style={{fontSize:11,color:"#9a9aaa",minWidth:60,textAlign:"right"}}>
-            {readCount}/{abooks.length} read
-          </span>
-          <span style={{fontSize:11,color:col.accent,background:col.tag,padding:"2px 8px",borderRadius:20,fontWeight:700,minWidth:28,textAlign:"center"}}>
-            {abooks.length}
-          </span>
-        </div>
-      </div>
+        /* Author name */
+        , React.createElement('div', { style: {fontSize:14,fontWeight:800,color:"#2c2c3a",letterSpacing:-0.3,flex:1},}, author)
 
-      {/* Books grid — hidden when collapsed */}
-      {!collapsed && (
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(185px,1fr))",gap:12}}>
-          {abooks.map(book=><BookCard key={book.id} book={book} onToggleRead={onToggleRead} onToggleWishlist={onToggleWishlist} onDelete={onDelete}/>)}
-        </div>
-      )}
-    </div>
+        /* Stats row */
+        , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:8,flexShrink:0},}
+          /* Progress bar */
+          , React.createElement('div', { style: {width:60,height:5,background:"#e0dbd4",borderRadius:4,overflow:"hidden"},}
+            , React.createElement('div', { style: {width:`${pct}%`,height:"100%",background:col.accent,borderRadius:4,transition:"width .3s"},})
+          )
+          , React.createElement('span', { style: {fontSize:11,color:"#9a9aaa",minWidth:60,textAlign:"right"},}
+            , readCount, "/", abooks.length, " read"
+          )
+          , React.createElement('span', { style: {fontSize:11,color:col.accent,background:col.tag,padding:"2px 8px",borderRadius:20,fontWeight:700,minWidth:28,textAlign:"center"},}
+            , abooks.length
+          )
+        )
+      )
+
+      /* Books grid — hidden when collapsed */
+      , !collapsed && (
+        React.createElement('div', { style: {display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(185px,1fr))",gap:12},}
+          , abooks.map(book=>React.createElement(BookCard, { key: book.id, book: book, onToggleRead: onToggleRead, onToggleWishlist: onToggleWishlist, onDelete: onDelete,}))
+        )
+      )
+    )
   );
 }
 
@@ -232,19 +216,19 @@ function BookCover({ title, author, col }) {
     fetch(`https://openlibrary.org/search.json?q=${q}&limit=1&fields=cover_i`)
       .then(r => r.json())
       .then(d => {
-        const coverId = d?.docs?.[0]?.cover_i;
+        const coverId = _optionalChain([d, 'optionalAccess', _2 => _2.docs, 'optionalAccess', _3 => _3[0], 'optionalAccess', _4 => _4.cover_i]);
         if (coverId) setSrc(`https://covers.openlibrary.org/b/id/${coverId}-M.jpg`);
       })
       .catch(() => {});
   }, [title, author, tried]);
 
   if (!src) return (
-    <div style={{width:"100%",height:"100%",background:`linear-gradient(145deg,${col.tag},${col.border})`,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:4}}>
-      <div style={{fontSize:28,opacity:0.5}}>📖</div>
-      <div style={{fontSize:8,color:col.accent,textAlign:"center",padding:"0 6px",opacity:0.7,fontWeight:600,lineHeight:1.3}}>{title.slice(0,30)}{title.length>30?"…":""}</div>
-    </div>
+    React.createElement('div', { style: {width:"100%",height:"100%",background:`linear-gradient(145deg,${col.tag},${col.border})`,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:4},}
+      , React.createElement('div', { style: {fontSize:28,opacity:0.5},}, "📖")
+      , React.createElement('div', { style: {fontSize:8,color:col.accent,textAlign:"center",padding:"0 6px",opacity:0.7,fontWeight:600,lineHeight:1.3},}, title.slice(0,30), title.length>30?"…":"")
+    )
   );
-  return <img src={src} alt={title} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} onError={()=>setSrc(null)}/>;
+  return React.createElement('img', { src: src, alt: title, style: {width:"100%",height:"100%",objectFit:"cover",display:"block"}, onError: ()=>setSrc(null),});
 }
 
 function BookCard({ book, onToggleRead, onToggleWishlist, onDelete }) {
@@ -260,50 +244,50 @@ function BookCard({ book, onToggleRead, onToggleWishlist, onDelete }) {
     window.open(url,"goodreads","width="+w+",height="+h+",left="+left+",top="+top+",scrollbars=yes,resizable=yes");
   };
   return (
-    <div style={{background:"#faf9f7",border:`1px solid ${col.border}`,borderTop:`3px solid ${col.accent}`,borderRadius:12,overflow:"hidden",transition:"transform .15s,box-shadow .15s",position:"relative",display:"flex",flexDirection:"column",boxShadow:"0 1px 3px rgba(0,0,0,.06)"}}
-      onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="0 6px 20px rgba(0,0,0,.10)"}}
-      onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 1px 3px rgba(0,0,0,.06)"}}>
+    React.createElement('div', { style: {background:"#faf9f7",border:`1px solid ${col.border}`,borderTop:`3px solid ${col.accent}`,borderRadius:12,overflow:"hidden",transition:"transform .15s,box-shadow .15s",position:"relative",display:"flex",flexDirection:"column",boxShadow:"0 1px 3px rgba(0,0,0,.06)"},
+      onMouseEnter: e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="0 6px 20px rgba(0,0,0,.10)"},
+      onMouseLeave: e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 1px 3px rgba(0,0,0,.06)"},}
 
-      {/* Cover thumbnail */}
-      <div style={{height:160,overflow:"hidden",position:"relative",cursor:"pointer",flexShrink:0}} onClick={openGoodreads} title="View on Goodreads">
-        <BookCover title={book.title} author={book.author} col={col}/>
-        {/* Badges overlay */}
-        <div style={{position:"absolute",top:6,right:6,display:"flex",flexDirection:"column",gap:3,alignItems:"flex-end"}}>
-          {book.nyt&&<span style={{background:"#8b2e2e",color:"#fff",fontSize:8,padding:"2px 6px",borderRadius:20,fontWeight:800,boxShadow:"0 1px 4px rgba(0,0,0,.3)"}}>NYT</span>}
-          {book.read&&<span style={{background:"#28622a",color:"#fff",fontSize:8,padding:"2px 6px",borderRadius:20,fontWeight:700,boxShadow:"0 1px 4px rgba(0,0,0,.3)"}}>READ</span>}
-          {book.wishlist&&!book.read&&<span style={{background:"#8a4a18",color:"#fff",fontSize:8,padding:"2px 6px",borderRadius:20,fontWeight:700,boxShadow:"0 1px 4px rgba(0,0,0,.3)"}}>LIST</span>}
-        </div>
-        {/* Year badge bottom-left */}
-        <div style={{position:"absolute",bottom:6,left:6}}>
-          <span style={{fontSize:9,background:"rgba(0,0,0,.55)",color:"#fff",padding:"2px 7px",borderRadius:10,fontWeight:600}}>{book.year}</span>
-        </div>
-      </div>
+      /* Cover thumbnail */
+      , React.createElement('div', { style: {height:160,overflow:"hidden",position:"relative",cursor:"pointer",flexShrink:0}, onClick: openGoodreads, title: "View on Goodreads"  ,}
+        , React.createElement(BookCover, { title: book.title, author: book.author, col: col,})
+        /* Badges overlay */
+        , React.createElement('div', { style: {position:"absolute",top:6,right:6,display:"flex",flexDirection:"column",gap:3,alignItems:"flex-end"},}
+          , book.nyt&&React.createElement('span', { style: {background:"#8b2e2e",color:"#fff",fontSize:8,padding:"2px 6px",borderRadius:20,fontWeight:800,boxShadow:"0 1px 4px rgba(0,0,0,.3)"},}, "NYT")
+          , book.read&&React.createElement('span', { style: {background:"#28622a",color:"#fff",fontSize:8,padding:"2px 6px",borderRadius:20,fontWeight:700,boxShadow:"0 1px 4px rgba(0,0,0,.3)"},}, "READ")
+          , book.wishlist&&!book.read&&React.createElement('span', { style: {background:"#8a4a18",color:"#fff",fontSize:8,padding:"2px 6px",borderRadius:20,fontWeight:700,boxShadow:"0 1px 4px rgba(0,0,0,.3)"},}, "LIST")
+        )
+        /* Year badge bottom-left */
+        , React.createElement('div', { style: {position:"absolute",bottom:6,left:6},}
+          , React.createElement('span', { style: {fontSize:9,background:"rgba(0,0,0,.55)",color:"#fff",padding:"2px 7px",borderRadius:10,fontWeight:600},}, book.year)
+        )
+      )
 
-      {/* Details */}
-      <div style={{padding:"10px 12px 0",flex:1}}>
-        <div style={{fontSize:9,color:col.accent,textTransform:"uppercase",letterSpacing:1.2,fontFamily:"monospace",fontWeight:700,marginBottom:4}}>{cat?.emoji} {cat?.label}</div>
-        <div onClick={openGoodreads}
-          style={{fontSize:13,fontWeight:700,color:"#2c2c2c",lineHeight:1.25,marginBottom:3,cursor:"pointer",textDecoration:"underline",textDecorationColor:"#ccc8c0",textUnderlineOffset:3}}
-          title="Click to view on Goodreads"
-        >{book.title} <span style={{fontSize:9,color:"#9a9aaa",fontWeight:400}}>↗</span></div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:6}}>
-          {book.genre&&<span style={{fontSize:9,background:col.tag,color:col.accent,padding:"2px 7px",borderRadius:20,fontWeight:700,border:`1px solid ${col.border}`}}>{book.genre}</span>}
-          {book.standalone&&<span style={{fontSize:9,background:"#e8f0fe",color:"#2a5bb5",padding:"2px 7px",borderRadius:20,fontWeight:700,border:"1px solid #b8cff0"}}>📖 Standalone</span>}
-        </div>
-        <StarRating rating={book.rating}/>
-        <div style={{display:"flex",flexWrap:"wrap",gap:3,margin:"6px 0 10px"}}>
-          {(book.tags||[]).slice(0,3).map(t=><span key={t} style={{background:col.tag,color:col.tagText,fontSize:9,padding:"2px 6px",borderRadius:20,fontWeight:500}}>{t}</span>)}
-        </div>
-      </div>
+      /* Details */
+      , React.createElement('div', { style: {padding:"10px 12px 0",flex:1},}
+        , React.createElement('div', { style: {fontSize:9,color:col.accent,textTransform:"uppercase",letterSpacing:1.2,fontFamily:"monospace",fontWeight:700,marginBottom:4},}, _optionalChain([cat, 'optionalAccess', _5 => _5.emoji]), " " , _optionalChain([cat, 'optionalAccess', _6 => _6.label]))
+        , React.createElement('div', { onClick: openGoodreads,
+          style: {fontSize:13,fontWeight:700,color:"#2c2c2c",lineHeight:1.25,marginBottom:3,cursor:"pointer",textDecoration:"underline",textDecorationColor:"#ccc8c0",textUnderlineOffset:3},
+          title: "Click to view on Goodreads"    ,}
+, book.title, " " , React.createElement('span', { style: {fontSize:9,color:"#9a9aaa",fontWeight:400},}, "↗"))
+        , React.createElement('div', { style: {display:"flex",flexWrap:"wrap",gap:4,marginBottom:6},}
+          , book.genre&&React.createElement('span', { style: {fontSize:9,background:col.tag,color:col.accent,padding:"2px 7px",borderRadius:20,fontWeight:700,border:`1px solid ${col.border}`},}, book.genre)
+          , book.standalone&&React.createElement('span', { style: {fontSize:9,background:"#e8f0fe",color:"#2a5bb5",padding:"2px 7px",borderRadius:20,fontWeight:700,border:"1px solid #b8cff0"},}, "📖 Standalone" )
+        )
+        , React.createElement(StarRating, { rating: book.rating,})
+        , React.createElement('div', { style: {display:"flex",flexWrap:"wrap",gap:3,margin:"6px 0 10px"},}
+          , (book.tags||[]).slice(0,3).map(t=>React.createElement('span', { key: t, style: {background:col.tag,color:col.tagText,fontSize:9,padding:"2px 6px",borderRadius:20,fontWeight:500},}, t))
+        )
+      )
 
-      {/* Actions */}
-      <div style={{display:"flex",borderTop:`1px solid ${col.border}`}}>
-        <button onClick={()=>onToggleRead(book.id)} style={{flex:1,padding:"8px 0",background:book.read?"#edf5ee":"none",border:"none",color:book.read?"#28622a":"#a0a0b0",cursor:"pointer",fontSize:11,fontWeight:600}}>{book.read?"✓ Read":"Mark Read"}</button>
-        <button onClick={()=>onToggleWishlist(book.id)} style={{flex:1,padding:"8px 0",background:book.wishlist?"#f5ede8":"none",border:"none",borderLeft:`1px solid ${col.border}`,borderRight:`1px solid ${col.border}`,color:book.wishlist?"#8a4a18":"#a0a0b0",cursor:"pointer",fontSize:11,fontWeight:600}}>{book.wishlist?"♥ Listed":"+ Wishlist"}</button>
-        <button onClick={()=>onDelete(book.id)} style={{width:32,background:"none",border:"none",color:"#c8c8d0",cursor:"pointer",fontSize:14}}
-          onMouseEnter={e=>e.currentTarget.style.color="#b04040"} onMouseLeave={e=>e.currentTarget.style.color="#c8c8d0"}>×</button>
-      </div>
-    </div>
+      /* Actions */
+      , React.createElement('div', { style: {display:"flex",borderTop:`1px solid ${col.border}`},}
+        , React.createElement('button', { onClick: ()=>onToggleRead(book.id), style: {flex:1,padding:"8px 0",background:book.read?"#edf5ee":"none",border:"none",color:book.read?"#28622a":"#a0a0b0",cursor:"pointer",fontSize:11,fontWeight:600},}, book.read?"✓ Read":"Mark Read")
+        , React.createElement('button', { onClick: ()=>onToggleWishlist(book.id), style: {flex:1,padding:"8px 0",background:book.wishlist?"#f5ede8":"none",border:"none",borderLeft:`1px solid ${col.border}`,borderRight:`1px solid ${col.border}`,color:book.wishlist?"#8a4a18":"#a0a0b0",cursor:"pointer",fontSize:11,fontWeight:600},}, book.wishlist?"♥ Listed":"+ Wishlist")
+        , React.createElement('button', { onClick: ()=>onDelete(book.id), style: {width:32,background:"none",border:"none",color:"#c8c8d0",cursor:"pointer",fontSize:14},
+          onMouseEnter: e=>e.currentTarget.style.color="#b04040", onMouseLeave: e=>e.currentTarget.style.color="#c8c8d0",}, "×")
+      )
+    )
   );
 }
 
@@ -320,29 +304,29 @@ function AuthorDropdown({ books, selectedAuthor, onChange }) {
     document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h);
   },[]);
   return (
-    <div ref={ref} style={{position:"relative",zIndex:50}}>
-      <button onClick={()=>setOpen(o=>!o)} style={{background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#3a3a4a",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:8,minWidth:180,justifyContent:"space-between"}}>
-        <span>👤 {selectedAuthor==="all"?"All Authors":selectedAuthor}</span>
-        <span style={{color:"#9a9aaa",fontSize:10}}>{open?"▲":"▼"}</span>
-      </button>
-      {open&&(
-        <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:12,boxShadow:"0 8px 30px rgba(0,0,0,.13)",maxHeight:300,overflowY:"auto",minWidth:220,zIndex:200}}>
-          {authorList.map(([author,count])=>{
+    React.createElement('div', { ref: ref, style: {position:"relative",zIndex:50},}
+      , React.createElement('button', { onClick: ()=>setOpen(o=>!o), style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#3a3a4a",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:8,minWidth:180,justifyContent:"space-between"},}
+        , React.createElement('span', null, "👤 " , selectedAuthor==="all"?"All Authors":selectedAuthor)
+        , React.createElement('span', { style: {color:"#9a9aaa",fontSize:10},}, open?"▲":"▼")
+      )
+      , open&&(
+        React.createElement('div', { style: {position:"absolute",top:"calc(100% + 4px)",left:0,background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:12,boxShadow:"0 8px 30px rgba(0,0,0,.13)",maxHeight:300,overflowY:"auto",minWidth:220,zIndex:200},}
+          , authorList.map(([author,count])=>{
             const val=author==="All Authors"?"all":author;
             const active=selectedAuthor===val;
             return (
-              <div key={author} onClick={()=>{onChange(val);setOpen(false)}}
-                style={{padding:"9px 16px",cursor:"pointer",display:"flex",justifyContent:"space-between",background:active?"#edeaf5":"transparent",color:active?"#342058":"#3a3a4a",fontWeight:active?700:400,fontSize:13,borderBottom:"1px solid #eee8e0"}}
-                onMouseEnter={e=>{if(!active)e.currentTarget.style.background="#f0ede8"}}
-                onMouseLeave={e=>{if(!active)e.currentTarget.style.background="transparent"}}>
-                <span>{author}</span>
-                <span style={{fontSize:11,color:"#9a9aaa",background:"#e8e4dc",padding:"1px 7px",borderRadius:20}}>{count}</span>
-              </div>
+              React.createElement('div', { key: author, onClick: ()=>{onChange(val);setOpen(false)},
+                style: {padding:"9px 16px",cursor:"pointer",display:"flex",justifyContent:"space-between",background:active?"#edeaf5":"transparent",color:active?"#342058":"#3a3a4a",fontWeight:active?700:400,fontSize:13,borderBottom:"1px solid #eee8e0"},
+                onMouseEnter: e=>{if(!active)e.currentTarget.style.background="#f0ede8"},
+                onMouseLeave: e=>{if(!active)e.currentTarget.style.background="transparent"},}
+                , React.createElement('span', null, author)
+                , React.createElement('span', { style: {fontSize:11,color:"#9a9aaa",background:"#e8e4dc",padding:"1px 7px",borderRadius:20},}, count)
+              )
             );
-          })}
-        </div>
-      )}
-    </div>
+          })
+        )
+      )
+    )
   );
 }
 
@@ -354,7 +338,7 @@ function AddBookModal({ onClose, onAdd, existingBooks }) {
   const [error,setError]=useState("");
   const [added,setAdded]=useState(false);
   const inputRef=useRef(null);
-  useEffect(()=>{setTimeout(()=>inputRef.current?.focus(),80);},[]);
+  useEffect(()=>{setTimeout(()=>_optionalChain([inputRef, 'access', _7 => _7.current, 'optionalAccess', _8 => _8.focus, 'call', _9 => _9()]),80);},[]);
 
   const fetchDetails=async()=>{
     const title=titleInput.trim();
@@ -387,56 +371,56 @@ Your response must start with { and end with }. Nothing before or after.`;
   const col=preview?(CAT_COLORS[preview.cat]||CAT_COLORS.british_thriller):CAT_COLORS.british_thriller;
   const cat=preview?CATEGORIES.find(c=>c.id===preview.cat):null;
   return (
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.38)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-      <div style={{background:"#faf9f7",border:"1px solid #d8d4cc",borderRadius:18,padding:28,width:"100%",maxWidth:520,boxShadow:"0 20px 60px rgba(0,0,0,.18)",maxHeight:"90vh",overflowY:"auto"}}>
-        <div style={{display:"flex",justifyContent:"space-between",marginBottom:20}}>
-          <div>
-            <div style={{fontSize:9,color:"#6a4015",letterSpacing:3,textTransform:"uppercase",fontFamily:"monospace",fontWeight:700,marginBottom:5}}>◆ ADD A BOOK</div>
-            <div style={{fontSize:18,fontWeight:900,color:"#1e1e2a"}}>Add to Your Library</div>
-            <div style={{fontSize:12,color:"#9a9aaa",marginTop:3}}>Type a title — AI will fetch all the details</div>
-          </div>
-          <button onClick={onClose} style={{background:"none",border:"none",color:"#9a9aaa",fontSize:22,cursor:"pointer"}}>×</button>
-        </div>
-        <div style={{display:"flex",gap:8,marginBottom:6}}>
-          <input ref={inputRef} value={titleInput} onChange={e=>{setTitleInput(e.target.value);setError("");setPreview(null);setAdded(false)}}
-            onKeyDown={e=>e.key==="Enter"&&!loading&&fetchDetails()}
-            placeholder="e.g. The Thursday Murder Club…"
-            style={{flex:1,background:"#f0ede8",border:"1.5px solid #ccc8c0",borderRadius:10,padding:"11px 14px",color:"#1e1e2a",fontSize:14,outline:"none"}}/>
-          <button onClick={fetchDetails} disabled={loading||!titleInput.trim()}
-            style={{background:loading?"#c0bcb4":"#7a3530",border:"none",borderRadius:10,padding:"11px 18px",color:"#fff",fontWeight:700,cursor:loading?"default":"pointer",fontSize:13,minWidth:80}}>
-            {loading?"⟳":"Fetch"}
-          </button>
-        </div>
-        <div style={{fontSize:11,color:"#9a9aaa",marginBottom:18}}>Press Enter or click Fetch to look up the book</div>
-        {loading&&<div style={{textAlign:"center",padding:"24px 0"}}><div style={{fontSize:28,animation:"spin 1s linear infinite",display:"inline-block"}}>◎</div><div style={{color:"#9a9aaa",fontSize:13,marginTop:8}}>Fetching details…</div></div>}
-        {error&&<div style={{background:"#f5eeee",border:"1px solid #d4b8b5",borderRadius:10,padding:"12px 16px",color:"#7a3530",fontSize:13,marginBottom:12}}>⚠️ {error}</div>}
-        {preview&&!loading&&(
-          <div style={{background:col.bg,border:`1px solid ${col.border}`,borderTop:`3px solid ${col.accent}`,borderRadius:14,padding:"18px 20px",animation:"fadeIn .3s ease"}}>
-            <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginBottom:8}}>
-              {cat&&<span style={{fontSize:9,color:col.accent,textTransform:"uppercase",letterSpacing:1.5,fontFamily:"monospace",fontWeight:700}}>{cat.emoji} {cat.label}</span>}
-              <span style={{fontSize:9,background:col.tag,color:col.tagText,padding:"1px 6px",borderRadius:10,fontWeight:600}}>{preview.year}</span>
-              {preview.nyt&&<span style={{background:"#8b2e2e",color:"#fff",fontSize:8,padding:"2px 6px",borderRadius:20,fontWeight:800}}>NYT</span>}
-              {preview.series&&<span style={{fontSize:9,color:"#9a9aaa",background:"#ede9e2",padding:"2px 8px",borderRadius:20}}>{preview.series}</span>}
-            </div>
-            <div style={{fontSize:18,fontWeight:900,color:"#1e1e2a",lineHeight:1.2,marginBottom:3}}>{preview.title}</div>
-            <div style={{fontSize:12,color:"#7a7a8a",marginBottom:8}}>by {preview.author}</div>
-            <div style={{marginBottom:8}}><StarRating rating={preview.rating}/></div>
-            <div style={{fontSize:12,color:"#4a4a5a",lineHeight:1.6,marginBottom:12,background:"rgba(255,255,255,.6)",borderRadius:8,padding:"10px 12px",borderLeft:`3px solid ${col.accent}40`}}>{preview.synopsis}</div>
-            <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:18}}>
-              {(preview.tags||[]).map(t=><span key={t} style={{background:col.tag,color:col.tagText,fontSize:9,padding:"2px 8px",borderRadius:20}}>{t}</span>)}
-            </div>
-            {!added?(
-              <div style={{display:"flex",gap:8}}>
-                <button onClick={()=>handleAdd(false)} style={{flex:1,background:col.accent,border:"none",borderRadius:10,padding:"11px 0",color:"#fff",fontWeight:800,cursor:"pointer",fontSize:13}}>+ Add to Library</button>
-                <button onClick={()=>handleAdd(true)} style={{flex:1,background:"#faf9f7",border:`1.5px solid ${col.accent}`,borderRadius:10,padding:"11px 0",color:col.accent,fontWeight:700,cursor:"pointer",fontSize:13}}>♥ Wishlist</button>
-              </div>
+    React.createElement('div', { style: {position:"fixed",inset:0,background:"rgba(0,0,0,.38)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20},}
+      , React.createElement('div', { style: {background:"#faf9f7",border:"1px solid #d8d4cc",borderRadius:18,padding:28,width:"100%",maxWidth:520,boxShadow:"0 20px 60px rgba(0,0,0,.18)",maxHeight:"90vh",overflowY:"auto"},}
+        , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",marginBottom:20},}
+          , React.createElement('div', null
+            , React.createElement('div', { style: {fontSize:9,color:"#6a4015",letterSpacing:3,textTransform:"uppercase",fontFamily:"monospace",fontWeight:700,marginBottom:5},}, "◆ ADD A BOOK"   )
+            , React.createElement('div', { style: {fontSize:18,fontWeight:900,color:"#1e1e2a"},}, "Add to Your Library"   )
+            , React.createElement('div', { style: {fontSize:12,color:"#9a9aaa",marginTop:3},}, "Type a title — AI will fetch all the details"         )
+          )
+          , React.createElement('button', { onClick: onClose, style: {background:"none",border:"none",color:"#9a9aaa",fontSize:22,cursor:"pointer"},}, "×")
+        )
+        , React.createElement('div', { style: {display:"flex",gap:8,marginBottom:6},}
+          , React.createElement('input', { ref: inputRef, value: titleInput, onChange: e=>{setTitleInput(e.target.value);setError("");setPreview(null);setAdded(false)},
+            onKeyDown: e=>e.key==="Enter"&&!loading&&fetchDetails(),
+            placeholder: "e.g. The Thursday Murder Club…"    ,
+            style: {flex:1,background:"#f0ede8",border:"1.5px solid #ccc8c0",borderRadius:10,padding:"11px 14px",color:"#1e1e2a",fontSize:14,outline:"none"},})
+          , React.createElement('button', { onClick: fetchDetails, disabled: loading||!titleInput.trim(),
+            style: {background:loading?"#c0bcb4":"#7a3530",border:"none",borderRadius:10,padding:"11px 18px",color:"#fff",fontWeight:700,cursor:loading?"default":"pointer",fontSize:13,minWidth:80},}
+            , loading?"⟳":"Fetch"
+          )
+        )
+        , React.createElement('div', { style: {fontSize:11,color:"#9a9aaa",marginBottom:18},}, "Press Enter or click Fetch to look up the book"         )
+        , loading&&React.createElement('div', { style: {textAlign:"center",padding:"24px 0"},}, React.createElement('div', { style: {fontSize:28,animation:"spin 1s linear infinite",display:"inline-block"},}, "◎"), React.createElement('div', { style: {color:"#9a9aaa",fontSize:13,marginTop:8},}, "Fetching details…" ))
+        , error&&React.createElement('div', { style: {background:"#f5eeee",border:"1px solid #d4b8b5",borderRadius:10,padding:"12px 16px",color:"#7a3530",fontSize:13,marginBottom:12},}, "⚠️ " , error)
+        , preview&&!loading&&(
+          React.createElement('div', { style: {background:col.bg,border:`1px solid ${col.border}`,borderTop:`3px solid ${col.accent}`,borderRadius:14,padding:"18px 20px",animation:"fadeIn .3s ease"},}
+            , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginBottom:8},}
+              , cat&&React.createElement('span', { style: {fontSize:9,color:col.accent,textTransform:"uppercase",letterSpacing:1.5,fontFamily:"monospace",fontWeight:700},}, cat.emoji, " " , cat.label)
+              , React.createElement('span', { style: {fontSize:9,background:col.tag,color:col.tagText,padding:"1px 6px",borderRadius:10,fontWeight:600},}, preview.year)
+              , preview.nyt&&React.createElement('span', { style: {background:"#8b2e2e",color:"#fff",fontSize:8,padding:"2px 6px",borderRadius:20,fontWeight:800},}, "NYT")
+              , preview.series&&React.createElement('span', { style: {fontSize:9,color:"#9a9aaa",background:"#ede9e2",padding:"2px 8px",borderRadius:20},}, preview.series)
+            )
+            , React.createElement('div', { style: {fontSize:18,fontWeight:900,color:"#1e1e2a",lineHeight:1.2,marginBottom:3},}, preview.title)
+            , React.createElement('div', { style: {fontSize:12,color:"#7a7a8a",marginBottom:8},}, "by " , preview.author)
+            , React.createElement('div', { style: {marginBottom:8},}, React.createElement(StarRating, { rating: preview.rating,}))
+            , React.createElement('div', { style: {fontSize:12,color:"#4a4a5a",lineHeight:1.6,marginBottom:12,background:"rgba(255,255,255,.6)",borderRadius:8,padding:"10px 12px",borderLeft:`3px solid ${col.accent}40`},}, preview.synopsis)
+            , React.createElement('div', { style: {display:"flex",flexWrap:"wrap",gap:5,marginBottom:18},}
+              , (preview.tags||[]).map(t=>React.createElement('span', { key: t, style: {background:col.tag,color:col.tagText,fontSize:9,padding:"2px 8px",borderRadius:20},}, t))
+            )
+            , !added?(
+              React.createElement('div', { style: {display:"flex",gap:8},}
+                , React.createElement('button', { onClick: ()=>handleAdd(false), style: {flex:1,background:col.accent,border:"none",borderRadius:10,padding:"11px 0",color:"#fff",fontWeight:800,cursor:"pointer",fontSize:13},}, "+ Add to Library"   )
+                , React.createElement('button', { onClick: ()=>handleAdd(true), style: {flex:1,background:"#faf9f7",border:`1.5px solid ${col.accent}`,borderRadius:10,padding:"11px 0",color:col.accent,fontWeight:700,cursor:"pointer",fontSize:13},}, "♥ Wishlist" )
+              )
             ):(
-              <div style={{textAlign:"center",padding:"10px 0",color:"#28622a",fontWeight:700}}>✓ Added!</div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+              React.createElement('div', { style: {textAlign:"center",padding:"10px 0",color:"#28622a",fontWeight:700},}, "✓ Added!" )
+            )
+          )
+        )
+      )
+    )
   );
 }
 
@@ -450,7 +434,7 @@ function AddAuthorModal({ onClose, onAddAll, existingBooks }) {
   const [adding, setAdding]     = useState(false);
   const [done, setDone]         = useState(false);
   const inputRef = useRef(null);
-  useEffect(()=>{ setTimeout(()=>inputRef.current?.focus(),100); },[]);
+  useEffect(()=>{ setTimeout(()=>_optionalChain([inputRef, 'access', _10 => _10.current, 'optionalAccess', _11 => _11.focus, 'call', _12 => _12()]),100); },[]);
 
   const existingTitles = useMemo(()=>new Set(existingBooks.map(b=>b.title.toLowerCase())),[existingBooks]);
 
@@ -510,110 +494,110 @@ Return the complete list sorted by year ascending.`;
     setAdding(false);
   };
 
-  const newCount = results ? [...selected].filter(i=>!existingTitles.has(results[i]?.title?.toLowerCase())).length : 0;
+  const newCount = results ? [...selected].filter(i=>!existingTitles.has(_optionalChain([results, 'access', _13 => _13[i], 'optionalAccess', _14 => _14.title, 'optionalAccess', _15 => _15.toLowerCase, 'call', _16 => _16()]))).length : 0;
   const alreadyCount = results ? results.filter(b=>existingTitles.has(b.title.toLowerCase())).length : 0;
 
   return (
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.55)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <div style={{background:"#faf9f7",borderRadius:18,width:"100%",maxWidth:560,maxHeight:"88vh",display:"flex",flexDirection:"column",boxShadow:"0 20px 60px rgba(0,0,0,.25)"}}>
+    React.createElement('div', { style: {position:"fixed",inset:0,background:"rgba(0,0,0,.55)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16}, onClick: e=>{if(e.target===e.currentTarget)onClose();},}
+      , React.createElement('div', { style: {background:"#faf9f7",borderRadius:18,width:"100%",maxWidth:560,maxHeight:"88vh",display:"flex",flexDirection:"column",boxShadow:"0 20px 60px rgba(0,0,0,.25)"},}
 
-        {/* Header */}
-        <div style={{padding:"20px 24px 16px",borderBottom:"1px solid #eee8e0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div>
-            <div style={{fontSize:18,fontWeight:800,color:"#1a2a3a"}}>👤 Add Author's Books</div>
-            <div style={{fontSize:12,color:"#9a9aaa",marginTop:2}}>Search any author — add their entire catalogue at once</div>
-          </div>
-          <button onClick={onClose} style={{background:"none",border:"none",fontSize:22,cursor:"pointer",color:"#9a9aaa",lineHeight:1}}>×</button>
-        </div>
+        /* Header */
+        , React.createElement('div', { style: {padding:"20px 24px 16px",borderBottom:"1px solid #eee8e0",display:"flex",justifyContent:"space-between",alignItems:"center"},}
+          , React.createElement('div', null
+            , React.createElement('div', { style: {fontSize:18,fontWeight:800,color:"#1a2a3a"},}, "👤 Add Author's Books"   )
+            , React.createElement('div', { style: {fontSize:12,color:"#9a9aaa",marginTop:2},}, "Search any author — add their entire catalogue at once"         )
+          )
+          , React.createElement('button', { onClick: onClose, style: {background:"none",border:"none",fontSize:22,cursor:"pointer",color:"#9a9aaa",lineHeight:1},}, "×")
+        )
 
-        {/* Search bar */}
-        <div style={{padding:"16px 24px 12px",borderBottom:"1px solid #eee8e0"}}>
-          <div style={{display:"flex",gap:8}}>
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={e=>setQuery(e.target.value)}
-              onKeyDown={e=>e.key==="Enter"&&!loading&&searchAuthor()}
-              placeholder="e.g. Stieg Larsson, Yuval Noah Harari, Jeffrey Archer…"
-              style={{flex:1,padding:"10px 14px",borderRadius:10,border:"1px solid #ccc8c0",fontSize:14,background:"#fff",outline:"none"}}
-            />
-            <button
-              onClick={searchAuthor}
-              disabled={loading||!query.trim()}
-              style={{background:"#1a4a6b",border:"none",borderRadius:10,padding:"10px 20px",color:"#fff",fontWeight:700,fontSize:13,cursor:loading?"wait":"pointer",opacity:loading||!query.trim()?0.6:1,whiteSpace:"nowrap"}}
-            >{loading?"Searching…":"Find Books"}</button>
-          </div>
-          {error&&<div style={{marginTop:8,fontSize:12,color:"#b04040"}}>{error}</div>}
-        </div>
+        /* Search bar */
+        , React.createElement('div', { style: {padding:"16px 24px 12px",borderBottom:"1px solid #eee8e0"},}
+          , React.createElement('div', { style: {display:"flex",gap:8},}
+            , React.createElement('input', {
+              ref: inputRef,
+              value: query,
+              onChange: e=>setQuery(e.target.value),
+              onKeyDown: e=>e.key==="Enter"&&!loading&&searchAuthor(),
+              placeholder: "e.g. Stieg Larsson, Yuval Noah Harari, Jeffrey Archer…"       ,
+              style: {flex:1,padding:"10px 14px",borderRadius:10,border:"1px solid #ccc8c0",fontSize:14,background:"#fff",outline:"none"},}
+            )
+            , React.createElement('button', {
+              onClick: searchAuthor,
+              disabled: loading||!query.trim(),
+              style: {background:"#1a4a6b",border:"none",borderRadius:10,padding:"10px 20px",color:"#fff",fontWeight:700,fontSize:13,cursor:loading?"wait":"pointer",opacity:loading||!query.trim()?0.6:1,whiteSpace:"nowrap"},}
+, loading?"Searching…":"Find Books")
+          )
+          , error&&React.createElement('div', { style: {marginTop:8,fontSize:12,color:"#b04040"},}, error)
+        )
 
-        {/* Results */}
-        <div style={{flex:1,overflowY:"auto",padding:"0 24px"}}>
-          {loading&&(
-            <div style={{textAlign:"center",padding:"40px 0",color:"#9a9aaa"}}>
-              <div style={{fontSize:28,marginBottom:8,animation:"spin 1s linear infinite",display:"inline-block"}}>◎</div>
-              <div style={{fontSize:13}}>Finding all books by {query}…</div>
-            </div>
-          )}
+        /* Results */
+        , React.createElement('div', { style: {flex:1,overflowY:"auto",padding:"0 24px"},}
+          , loading&&(
+            React.createElement('div', { style: {textAlign:"center",padding:"40px 0",color:"#9a9aaa"},}
+              , React.createElement('div', { style: {fontSize:28,marginBottom:8,animation:"spin 1s linear infinite",display:"inline-block"},}, "◎")
+              , React.createElement('div', { style: {fontSize:13},}, "Finding all books by "    , query, "…")
+            )
+          )
 
-          {results&&!loading&&!done&&(
-            <>
-              {/* Summary bar */}
-              <div style={{padding:"12px 0",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,flexWrap:"wrap"}}>
-                <div style={{fontSize:13,color:"#4a4a5a"}}>
-                  <strong>{results.length}</strong> books found
-                  {alreadyCount>0&&<span style={{color:"#28622a",marginLeft:8}}>· {alreadyCount} already in library</span>}
-                  {newCount>0&&<span style={{color:"#1a4a6b",marginLeft:8}}>· <strong>{newCount}</strong> selected to add</span>}
-                </div>
-                <div style={{display:"flex",gap:6}}>
-                  <button onClick={selectAll} style={{fontSize:11,padding:"4px 10px",borderRadius:8,border:"1px solid #1a4a6b",background:"none",color:"#1a4a6b",cursor:"pointer",fontWeight:600}}>Select New</button>
-                  <button onClick={deselectAll} style={{fontSize:11,padding:"4px 10px",borderRadius:8,border:"1px solid #ccc8c0",background:"none",color:"#7a7a8a",cursor:"pointer"}}>Deselect All</button>
-                </div>
-              </div>
+          , results&&!loading&&!done&&(
+            React.createElement(React.Fragment, null
+              /* Summary bar */
+              , React.createElement('div', { style: {padding:"12px 0",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,flexWrap:"wrap"},}
+                , React.createElement('div', { style: {fontSize:13,color:"#4a4a5a"},}
+                  , React.createElement('strong', null, results.length), " books found"
+                  , alreadyCount>0&&React.createElement('span', { style: {color:"#28622a",marginLeft:8},}, "· " , alreadyCount, " already in library"   )
+                  , newCount>0&&React.createElement('span', { style: {color:"#1a4a6b",marginLeft:8},}, "· " , React.createElement('strong', null, newCount), " selected to add"   )
+                )
+                , React.createElement('div', { style: {display:"flex",gap:6},}
+                  , React.createElement('button', { onClick: selectAll, style: {fontSize:11,padding:"4px 10px",borderRadius:8,border:"1px solid #1a4a6b",background:"none",color:"#1a4a6b",cursor:"pointer",fontWeight:600},}, "Select New" )
+                  , React.createElement('button', { onClick: deselectAll, style: {fontSize:11,padding:"4px 10px",borderRadius:8,border:"1px solid #ccc8c0",background:"none",color:"#7a7a8a",cursor:"pointer"},}, "Deselect All" )
+                )
+              )
 
-              {/* Book list */}
-              {results.map((b,i)=>{
+              /* Book list */
+              , results.map((b,i)=>{
                 const alreadyHave = existingTitles.has(b.title.toLowerCase());
                 const isSel = selected.has(i);
                 return (
-                  <div key={i}
-                    onClick={()=>!alreadyHave&&toggleSelect(i)}
-                    style={{display:"flex",alignItems:"center",gap:10,padding:"9px 10px",marginBottom:4,borderRadius:10,border:`1px solid ${isSel?"#1a4a6b":alreadyHave?"#d0e8d0":"#eee8e0"}`,background:isSel?"#e8f0fe":alreadyHave?"#f0f8f0":"#fff",cursor:alreadyHave?"default":"pointer",opacity:alreadyHave?0.7:1,transition:"all .12s"}}>
-                    <div style={{width:18,height:18,borderRadius:4,border:`2px solid ${alreadyHave?"#28622a":isSel?"#1a4a6b":"#ccc8c0"}`,background:alreadyHave?"#28622a":isSel?"#1a4a6b":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                      {(alreadyHave||isSel)&&<span style={{color:"#fff",fontSize:11,lineHeight:1}}>✓</span>}
-                    </div>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:13,fontWeight:600,color:"#2c2c2c",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{b.title}</div>
-                      <div style={{fontSize:11,color:"#7a7a8a",marginTop:1}}>{b.year} · {b.genre}{b.standalone&&" · Standalone"}{alreadyHave&&" · ✓ In Library"}</div>
-                    </div>
-                    {b.nyt&&<span style={{fontSize:8,background:"#8b2e2e",color:"#fff",padding:"2px 5px",borderRadius:10,fontWeight:800,flexShrink:0}}>NYT</span>}
-                  </div>
+                  React.createElement('div', { key: i,
+                    onClick: ()=>!alreadyHave&&toggleSelect(i),
+                    style: {display:"flex",alignItems:"center",gap:10,padding:"9px 10px",marginBottom:4,borderRadius:10,border:`1px solid ${isSel?"#1a4a6b":alreadyHave?"#d0e8d0":"#eee8e0"}`,background:isSel?"#e8f0fe":alreadyHave?"#f0f8f0":"#fff",cursor:alreadyHave?"default":"pointer",opacity:alreadyHave?0.7:1,transition:"all .12s"},}
+                    , React.createElement('div', { style: {width:18,height:18,borderRadius:4,border:`2px solid ${alreadyHave?"#28622a":isSel?"#1a4a6b":"#ccc8c0"}`,background:alreadyHave?"#28622a":isSel?"#1a4a6b":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0},}
+                      , (alreadyHave||isSel)&&React.createElement('span', { style: {color:"#fff",fontSize:11,lineHeight:1},}, "✓")
+                    )
+                    , React.createElement('div', { style: {flex:1,minWidth:0},}
+                      , React.createElement('div', { style: {fontSize:13,fontWeight:600,color:"#2c2c2c",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"},}, b.title)
+                      , React.createElement('div', { style: {fontSize:11,color:"#7a7a8a",marginTop:1},}, b.year, " · "  , b.genre, b.standalone&&" · Standalone", alreadyHave&&" · ✓ In Library")
+                    )
+                    , b.nyt&&React.createElement('span', { style: {fontSize:8,background:"#8b2e2e",color:"#fff",padding:"2px 5px",borderRadius:10,fontWeight:800,flexShrink:0},}, "NYT")
+                  )
                 );
-              })}
-            </>
-          )}
+              })
+            )
+          )
 
-          {done&&(
-            <div style={{textAlign:"center",padding:"48px 0"}}>
-              <div style={{fontSize:40,marginBottom:12}}>✅</div>
-              <div style={{fontSize:18,fontWeight:700,color:"#2c2c2c",marginBottom:6}}>{newCount} books added!</div>
-              <div style={{fontSize:13,color:"#7a7a8a"}}>All books by {query} are now in your library.</div>
-            </div>
-          )}
-        </div>
+          , done&&(
+            React.createElement('div', { style: {textAlign:"center",padding:"48px 0"},}
+              , React.createElement('div', { style: {fontSize:40,marginBottom:12},}, "✅")
+              , React.createElement('div', { style: {fontSize:18,fontWeight:700,color:"#2c2c2c",marginBottom:6},}, newCount, " books added!"  )
+              , React.createElement('div', { style: {fontSize:13,color:"#7a7a8a"},}, "All books by "   , query, " are now in your library."     )
+            )
+          )
+        )
 
-        {/* Footer */}
-        {results&&!done&&(
-          <div style={{padding:"14px 24px",borderTop:"1px solid #eee8e0",display:"flex",gap:8,justifyContent:"flex-end"}}>
-            <button onClick={onClose} style={{padding:"10px 20px",borderRadius:10,border:"1px solid #ccc8c0",background:"none",color:"#5a5a6a",fontSize:13,cursor:"pointer",fontWeight:600}}>Cancel</button>
-            <button
-              onClick={handleAdd}
-              disabled={adding||!selected.size}
-              style={{padding:"10px 24px",borderRadius:10,border:"none",background:selected.size?"#1a4a6b":"#ccc8c0",color:"#fff",fontSize:13,fontWeight:700,cursor:selected.size?"pointer":"default"}}
-            >{adding?`Adding ${newCount} books…`:`Add ${newCount} Book${newCount!==1?"s":""} to Library`}</button>
-          </div>
-        )}
-      </div>
-    </div>
+        /* Footer */
+        , results&&!done&&(
+          React.createElement('div', { style: {padding:"14px 24px",borderTop:"1px solid #eee8e0",display:"flex",gap:8,justifyContent:"flex-end"},}
+            , React.createElement('button', { onClick: onClose, style: {padding:"10px 20px",borderRadius:10,border:"1px solid #ccc8c0",background:"none",color:"#5a5a6a",fontSize:13,cursor:"pointer",fontWeight:600},}, "Cancel")
+            , React.createElement('button', {
+              onClick: handleAdd,
+              disabled: adding||!selected.size,
+              style: {padding:"10px 24px",borderRadius:10,border:"none",background:selected.size?"#1a4a6b":"#ccc8c0",color:"#fff",fontSize:13,fontWeight:700,cursor:selected.size?"pointer":"default"},}
+, adding?`Adding ${newCount} books…`:`Add ${newCount} Book${newCount!==1?"s":""} to Library`)
+          )
+        )
+      )
+    )
   );
 }
 
@@ -640,45 +624,45 @@ Start with [ end with ]. Nothing else.`;
   };
   const suggestions=["More Vince Flynn Mitch Rapp","More Harlan Coben standalones","Indian RAW intelligence thrillers","Daniel Silva Gabriel Allon series","More Harry Bosch Connelly","More Amos Decker Baldacci"];
   return (
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.35)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-      <div style={{background:"#faf9f7",border:"1px solid #d8d4cc",borderRadius:18,padding:28,width:"100%",maxWidth:560,maxHeight:"82vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.18)"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-          <div><div style={{fontSize:19,fontWeight:800,color:"#2c2c3a"}}>✦ AI Book Finder</div><div style={{fontSize:12,color:"#9a9aaa",marginTop:2}}>Discover more books for your library</div></div>
-          <button onClick={onClose} style={{background:"none",border:"none",color:"#9a9aaa",fontSize:22,cursor:"pointer"}}>×</button>
-        </div>
-        <div style={{display:"flex",gap:8,marginBottom:12}}>
-          <input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&query&&fetchBooks(query)} placeholder="e.g. More Brad Thor CIA thrillers..."
-            style={{flex:1,background:"#f0ede8",border:"1px solid #ccc8c0",borderRadius:10,padding:"10px 14px",color:"#2c2c3a",fontSize:13,outline:"none"}}/>
-          <button onClick={()=>query&&fetchBooks(query)} style={{background:"#7a3530",border:"none",borderRadius:10,padding:"10px 18px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13}}>Search</button>
-        </div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:20}}>
-          {suggestions.map(s=><button key={s} onClick={()=>{setQuery(s);fetchBooks(s)}} style={{background:"#edeae4",border:"1px solid #ccc8c0",borderRadius:20,padding:"5px 11px",color:"#4a4a5a",fontSize:10,cursor:"pointer"}}>{s}</button>)}
-        </div>
-        {loading&&<div style={{textAlign:"center",padding:32,color:"#9a9aaa"}}><div style={{fontSize:28,animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</div></div>}
-        {error&&<div style={{color:"#7a3530",padding:16,fontSize:13}}>⚠️ {error}</div>}
-        {results.map(book=>{
+    React.createElement('div', { style: {position:"fixed",inset:0,background:"rgba(0,0,0,.35)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20},}
+      , React.createElement('div', { style: {background:"#faf9f7",border:"1px solid #d8d4cc",borderRadius:18,padding:28,width:"100%",maxWidth:560,maxHeight:"82vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.18)"},}
+        , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20},}
+          , React.createElement('div', null, React.createElement('div', { style: {fontSize:19,fontWeight:800,color:"#2c2c3a"},}, "✦ AI Book Finder"   ), React.createElement('div', { style: {fontSize:12,color:"#9a9aaa",marginTop:2},}, "Discover more books for your library"     ))
+          , React.createElement('button', { onClick: onClose, style: {background:"none",border:"none",color:"#9a9aaa",fontSize:22,cursor:"pointer"},}, "×")
+        )
+        , React.createElement('div', { style: {display:"flex",gap:8,marginBottom:12},}
+          , React.createElement('input', { value: query, onChange: e=>setQuery(e.target.value), onKeyDown: e=>e.key==="Enter"&&query&&fetchBooks(query), placeholder: "e.g. More Brad Thor CIA thrillers..."     ,
+            style: {flex:1,background:"#f0ede8",border:"1px solid #ccc8c0",borderRadius:10,padding:"10px 14px",color:"#2c2c3a",fontSize:13,outline:"none"},})
+          , React.createElement('button', { onClick: ()=>query&&fetchBooks(query), style: {background:"#7a3530",border:"none",borderRadius:10,padding:"10px 18px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13},}, "Search")
+        )
+        , React.createElement('div', { style: {display:"flex",flexWrap:"wrap",gap:6,marginBottom:20},}
+          , suggestions.map(s=>React.createElement('button', { key: s, onClick: ()=>{setQuery(s);fetchBooks(s)}, style: {background:"#edeae4",border:"1px solid #ccc8c0",borderRadius:20,padding:"5px 11px",color:"#4a4a5a",fontSize:10,cursor:"pointer"},}, s))
+        )
+        , loading&&React.createElement('div', { style: {textAlign:"center",padding:32,color:"#9a9aaa"},}, React.createElement('div', { style: {fontSize:28,animation:"spin 1s linear infinite",display:"inline-block"},}, "⟳"))
+        , error&&React.createElement('div', { style: {color:"#7a3530",padding:16,fontSize:13},}, "⚠️ " , error)
+        , results.map(book=>{
           const col=CAT_COLORS[book.cat]||CAT_COLORS.british_thriller;
           const cat=CATEGORIES.find(c=>c.id===book.cat);
           return(
-            <div key={book.id} style={{background:col.bg,border:`1px solid ${col.border}`,borderTop:`2px solid ${col.accent}`,borderRadius:10,padding:14,marginBottom:10}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"start"}}>
-                <div style={{flex:1}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
-                    <span style={{fontSize:10,color:col.accent,fontWeight:700}}>{cat?.emoji} {cat?.label}</span>
-                    {book.nyt&&<span style={{background:"#8b2e2e",color:"#fff",fontSize:8,padding:"1px 5px",borderRadius:10,fontWeight:800}}>NYT</span>}
-                    <span style={{background:col.tag,color:col.tagText,fontSize:9,padding:"1px 6px",borderRadius:10}}>{book.year}</span>
-                  </div>
-                  <div style={{fontSize:14,fontWeight:700,color:"#2c2c3a"}}>{book.title}</div>
-                  <div style={{fontSize:11,color:"#7a7a8a",marginBottom:3}}>by {book.author}</div>
-                  <StarRating rating={book.rating}/>
-                </div>
-                <button onClick={()=>onAdd(book)} style={{background:col.accent,border:"none",borderRadius:8,padding:"7px 12px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:11,marginLeft:10}}>+ Add</button>
-              </div>
-            </div>
+            React.createElement('div', { key: book.id, style: {background:col.bg,border:`1px solid ${col.border}`,borderTop:`2px solid ${col.accent}`,borderRadius:10,padding:14,marginBottom:10},}
+              , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"start"},}
+                , React.createElement('div', { style: {flex:1},}
+                  , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,marginBottom:3},}
+                    , React.createElement('span', { style: {fontSize:10,color:col.accent,fontWeight:700},}, _optionalChain([cat, 'optionalAccess', _17 => _17.emoji]), " " , _optionalChain([cat, 'optionalAccess', _18 => _18.label]))
+                    , book.nyt&&React.createElement('span', { style: {background:"#8b2e2e",color:"#fff",fontSize:8,padding:"1px 5px",borderRadius:10,fontWeight:800},}, "NYT")
+                    , React.createElement('span', { style: {background:col.tag,color:col.tagText,fontSize:9,padding:"1px 6px",borderRadius:10},}, book.year)
+                  )
+                  , React.createElement('div', { style: {fontSize:14,fontWeight:700,color:"#2c2c3a"},}, book.title)
+                  , React.createElement('div', { style: {fontSize:11,color:"#7a7a8a",marginBottom:3},}, "by " , book.author)
+                  , React.createElement(StarRating, { rating: book.rating,})
+                )
+                , React.createElement('button', { onClick: ()=>onAdd(book), style: {background:col.accent,border:"none",borderRadius:8,padding:"7px 12px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:11,marginLeft:10},}, "+ Add" )
+              )
+            )
           );
-        })}
-      </div>
-    </div>
+        })
+      )
+    )
   );
 }
 
@@ -689,7 +673,7 @@ function CountdownTimer({ nextRefresh }) {
     const upd=()=>{const d=nextRefresh-new Date();if(d<=0){setT("Refreshing…");return;}setT(Math.floor(d/3600000)+"h "+Math.floor((d%3600000)/60000)+"m");};
     upd();const id=setInterval(upd,60000);return()=>clearInterval(id);
   },[nextRefresh]);
-  return <span>{t}</span>;
+  return React.createElement('span', null, t);
 }
 
 // ── Recommendations Tab ──
@@ -718,81 +702,81 @@ function RecommendationsTab({ onAddToLibrary }) {
   useEffect(()=>{loadRecs();},[]);
 
   return(
-    <div style={{maxWidth:860,margin:"0 auto",padding:"24px"}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12,marginBottom:22}}>
-        <div>
-          <div style={{fontSize:9,color:"#6a4015",textTransform:"uppercase",letterSpacing:3,fontFamily:"monospace",fontWeight:700,marginBottom:6}}>◆ CURATED FOR YOUR LIBRARY</div>
-          <div style={{fontSize:20,fontWeight:900,color:"#1e1e2a"}}>{data?.headline||"Personalised Reading Picks"}</div>
-          <div style={{fontSize:12,color:"#9a9aaa",marginTop:3}}>Based on your reading profile · Refreshes every 48 hours</div>
-        </div>
-        <div style={{background:"#edeae4",border:"1px solid #d0ccc4",borderRadius:12,padding:"10px 16px",textAlign:"right"}}>
-          <div style={{fontSize:9,color:"#9a9aaa",textTransform:"uppercase",letterSpacing:1.5,marginBottom:3}}>Next refresh</div>
-          <div style={{fontSize:17,fontWeight:800,color:"#342058"}}><CountdownTimer nextRefresh={win.nextRefresh}/></div>
-        </div>
-      </div>
-      <div style={{background:"#faf9f7",border:"1px solid #d8d4cc",borderRadius:12,padding:"14px 18px",marginBottom:22}}>
-        <div style={{fontSize:9,color:"#6a4015",textTransform:"uppercase",letterSpacing:2.5,fontFamily:"monospace",fontWeight:700,marginBottom:10}}>Your Reading DNA</div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-          {[...LIBRARY_PROFILE.series,...LIBRARY_PROFILE.themes].map(tag=>(
-            <span key={tag} style={{background:"#ede9e2",color:"#4a4a5a",fontSize:10,padding:"3px 10px",borderRadius:20,border:"1px solid #d8d4cc"}}>{tag}</span>
-          ))}
-        </div>
-      </div>
-      {loading&&<div style={{textAlign:"center",padding:"50px 0"}}><div style={{fontSize:34,animation:"spin 1.2s linear infinite",display:"inline-block",marginBottom:14}}>◎</div><div style={{color:"#9a9aaa",fontSize:14}}>Analysing your library…</div></div>}
-      {error&&(
-        <div style={{background:"#f5eeee",border:"1px solid #d4b8b5",borderRadius:12,padding:"20px 24px",textAlign:"center"}}>
-          <div style={{fontSize:22,marginBottom:8}}>⚠️</div>
-          <div style={{color:"#7a3530",fontSize:13,fontWeight:600,marginBottom:12,wordBreak:"break-word"}}>{error}</div>
-          <button onClick={()=>loadRecs(true)} style={{background:"#7a3530",border:"none",borderRadius:8,padding:"9px 20px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13}}>Try Again</button>
-        </div>
-      )}
-      {data&&!loading&&(
-        <>
-          <div style={{display:"flex",justifyContent:"flex-end",marginBottom:14}}>
-            <button onClick={()=>loadRecs(true)} style={{background:"none",border:"1px solid #d0ccc4",borderRadius:8,padding:"6px 14px",color:"#6a6a7a",fontSize:11,cursor:"pointer"}}>↻ Refresh now</button>
-          </div>
-          <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            {(data.picks||[]).map((pick,i)=>{
+    React.createElement('div', { style: {maxWidth:860,margin:"0 auto",padding:"24px"},}
+      , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12,marginBottom:22},}
+        , React.createElement('div', null
+          , React.createElement('div', { style: {fontSize:9,color:"#6a4015",textTransform:"uppercase",letterSpacing:3,fontFamily:"monospace",fontWeight:700,marginBottom:6},}, "◆ CURATED FOR YOUR LIBRARY"    )
+          , React.createElement('div', { style: {fontSize:20,fontWeight:900,color:"#1e1e2a"},}, _optionalChain([data, 'optionalAccess', _19 => _19.headline])||"Personalised Reading Picks")
+          , React.createElement('div', { style: {fontSize:12,color:"#9a9aaa",marginTop:3},}, "Based on your reading profile · Refreshes every 48 hours"         )
+        )
+        , React.createElement('div', { style: {background:"#edeae4",border:"1px solid #d0ccc4",borderRadius:12,padding:"10px 16px",textAlign:"right"},}
+          , React.createElement('div', { style: {fontSize:9,color:"#9a9aaa",textTransform:"uppercase",letterSpacing:1.5,marginBottom:3},}, "Next refresh" )
+          , React.createElement('div', { style: {fontSize:17,fontWeight:800,color:"#342058"},}, React.createElement(CountdownTimer, { nextRefresh: win.nextRefresh,}))
+        )
+      )
+      , React.createElement('div', { style: {background:"#faf9f7",border:"1px solid #d8d4cc",borderRadius:12,padding:"14px 18px",marginBottom:22},}
+        , React.createElement('div', { style: {fontSize:9,color:"#6a4015",textTransform:"uppercase",letterSpacing:2.5,fontFamily:"monospace",fontWeight:700,marginBottom:10},}, "Your Reading DNA"  )
+        , React.createElement('div', { style: {display:"flex",flexWrap:"wrap",gap:6},}
+          , [...LIBRARY_PROFILE.series,...LIBRARY_PROFILE.themes].map(tag=>(
+            React.createElement('span', { key: tag, style: {background:"#ede9e2",color:"#4a4a5a",fontSize:10,padding:"3px 10px",borderRadius:20,border:"1px solid #d8d4cc"},}, tag)
+          ))
+        )
+      )
+      , loading&&React.createElement('div', { style: {textAlign:"center",padding:"50px 0"},}, React.createElement('div', { style: {fontSize:34,animation:"spin 1.2s linear infinite",display:"inline-block",marginBottom:14},}, "◎"), React.createElement('div', { style: {color:"#9a9aaa",fontSize:14},}, "Analysing your library…"  ))
+      , error&&(
+        React.createElement('div', { style: {background:"#f5eeee",border:"1px solid #d4b8b5",borderRadius:12,padding:"20px 24px",textAlign:"center"},}
+          , React.createElement('div', { style: {fontSize:22,marginBottom:8},}, "⚠️")
+          , React.createElement('div', { style: {color:"#7a3530",fontSize:13,fontWeight:600,marginBottom:12,wordBreak:"break-word"},}, error)
+          , React.createElement('button', { onClick: ()=>loadRecs(true), style: {background:"#7a3530",border:"none",borderRadius:8,padding:"9px 20px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13},}, "Try Again" )
+        )
+      )
+      , data&&!loading&&(
+        React.createElement(React.Fragment, null
+          , React.createElement('div', { style: {display:"flex",justifyContent:"flex-end",marginBottom:14},}
+            , React.createElement('button', { onClick: ()=>loadRecs(true), style: {background:"none",border:"1px solid #d0ccc4",borderRadius:8,padding:"6px 14px",color:"#6a6a7a",fontSize:11,cursor:"pointer"},}, "↻ Refresh now"  )
+          )
+          , React.createElement('div', { style: {display:"flex",flexDirection:"column",gap:10},}
+            , (data.picks||[]).map((pick,i)=>{
               const mc=MOOD_COLORS[pick.mood]||MOOD_COLORS["Action-Packed"];
               const cc=CAT_COLORS[pick.cat]||CAT_COLORS.british_thriller;
               const cat=CATEGORIES.find(c=>c.id===pick.cat);
               const [added,setAdded]=useState(false);
               return(
-                <div key={i} style={{background:"#faf9f7",border:`1px solid #d8d4cc`,borderLeft:`4px solid ${mc.accent}`,borderRadius:12,padding:"16px 18px",display:"flex",gap:14}}>
-                  <div style={{minWidth:28,height:28,borderRadius:"50%",background:mc.bg,border:`1.5px solid ${mc.accent}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:mc.accent,flexShrink:0}}>{i+1}</div>
-                  <div style={{flex:1}}>
-                    <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginBottom:4}}>
-                      <span style={{fontSize:9,background:mc.bg,color:mc.accent,border:`1px solid ${mc.accent}40`,padding:"2px 8px",borderRadius:20,fontWeight:700,textTransform:"uppercase"}}>{pick.mood}</span>
-                      {pick.nyt&&<span style={{fontSize:8,background:"#8b2e2e",color:"#fff",padding:"2px 6px",borderRadius:20,fontWeight:800}}>NYT</span>}
-                      {cat&&<span style={{fontSize:9,background:cc.tag,color:cc.tagText,padding:"2px 7px",borderRadius:20}}>{cat.emoji} {cat.label}</span>}
-                    </div>
-                    <div style={{fontSize:15,fontWeight:800,color:"#1e1e2a",marginBottom:2}}>{pick.title}</div>
-                    <div style={{fontSize:11,color:"#7a7a8a",marginBottom:6}}>{pick.author} · {pick.year} · <span style={{color:"#c08b20",fontWeight:700}}>★ {Number(pick.rating).toFixed(1)}</span></div>
-                    <div style={{fontSize:12,color:"#5a5a6a",fontStyle:"italic",marginBottom:10}}>"{pick.why}"</div>
-                    <button onClick={()=>{if(!added){onAddToLibrary({id:Date.now()+i,cat:pick.cat||"british_thriller",title:pick.title,author:pick.author,year:pick.year,rating:pick.rating,nyt:pick.nyt||false,tags:[pick.genre,pick.mood].filter(Boolean),read:false,wishlist:false});setAdded(true);}}}
-                      style={{background:added?"#e8e4dc":mc.accent,border:"none",borderRadius:8,padding:"6px 14px",color:added?"#9a9aaa":"#fff",fontWeight:700,cursor:added?"default":"pointer",fontSize:11}}>
-                      {added?"✓ Added":"+ Add to Library"}
-                    </button>
-                  </div>
-                </div>
+                React.createElement('div', { key: i, style: {background:"#faf9f7",border:`1px solid #d8d4cc`,borderLeft:`4px solid ${mc.accent}`,borderRadius:12,padding:"16px 18px",display:"flex",gap:14},}
+                  , React.createElement('div', { style: {minWidth:28,height:28,borderRadius:"50%",background:mc.bg,border:`1.5px solid ${mc.accent}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:mc.accent,flexShrink:0},}, i+1)
+                  , React.createElement('div', { style: {flex:1},}
+                    , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginBottom:4},}
+                      , React.createElement('span', { style: {fontSize:9,background:mc.bg,color:mc.accent,border:`1px solid ${mc.accent}40`,padding:"2px 8px",borderRadius:20,fontWeight:700,textTransform:"uppercase"},}, pick.mood)
+                      , pick.nyt&&React.createElement('span', { style: {fontSize:8,background:"#8b2e2e",color:"#fff",padding:"2px 6px",borderRadius:20,fontWeight:800},}, "NYT")
+                      , cat&&React.createElement('span', { style: {fontSize:9,background:cc.tag,color:cc.tagText,padding:"2px 7px",borderRadius:20},}, cat.emoji, " " , cat.label)
+                    )
+                    , React.createElement('div', { style: {fontSize:15,fontWeight:800,color:"#1e1e2a",marginBottom:2},}, pick.title)
+                    , React.createElement('div', { style: {fontSize:11,color:"#7a7a8a",marginBottom:6},}, pick.author, " · "  , pick.year, " · "  , React.createElement('span', { style: {color:"#c08b20",fontWeight:700},}, "★ " , Number(pick.rating).toFixed(1)))
+                    , React.createElement('div', { style: {fontSize:12,color:"#5a5a6a",fontStyle:"italic",marginBottom:10},}, "\"", pick.why, "\"")
+                    , React.createElement('button', { onClick: ()=>{if(!added){onAddToLibrary({id:Date.now()+i,cat:pick.cat||"british_thriller",title:pick.title,author:pick.author,year:pick.year,rating:pick.rating,nyt:pick.nyt||false,tags:[pick.genre,pick.mood].filter(Boolean),read:false,wishlist:false});setAdded(true);}},
+                      style: {background:added?"#e8e4dc":mc.accent,border:"none",borderRadius:8,padding:"6px 14px",color:added?"#9a9aaa":"#fff",fontWeight:700,cursor:added?"default":"pointer",fontSize:11},}
+                      , added?"✓ Added":"+ Add to Library"
+                    )
+                  )
+                )
               );
-            })}
-          </div>
-          {data.spotlightAuthor&&(
-            <div style={{background:"linear-gradient(135deg,#f5efea 0%,#eeecf5 100%)",border:"1px solid #ccc8c0",borderTop:"3px solid #6a4015",borderRadius:14,padding:"20px 22px",marginTop:24}}>
-              <div style={{fontSize:9,color:"#6a4015",textTransform:"uppercase",letterSpacing:3,fontFamily:"monospace",fontWeight:700,marginBottom:10}}>✦ Author Spotlight</div>
-              <div style={{fontSize:20,fontWeight:900,color:"#1e1e2a",marginBottom:2}}>{data.spotlightAuthor.name}</div>
-              <div style={{fontSize:11,color:"#9a9aaa",marginBottom:10}}>{data.spotlightAuthor.booksCount} books in catalogue</div>
-              <div style={{fontSize:13,color:"#4a4a5a",lineHeight:1.6,marginBottom:14}}>{data.spotlightAuthor.why}</div>
-              <div style={{background:"#faf9f7",border:"1px solid #d8d4cc",borderRadius:10,padding:"14px 18px",display:"inline-block"}}>
-                <div style={{fontSize:9,color:"#9a9aaa",textTransform:"uppercase",letterSpacing:2,marginBottom:4}}>Must-Read First</div>
-                <div style={{fontSize:14,fontWeight:800,color:"#342058"}}>"{data.spotlightAuthor.mustRead}"</div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+            })
+          )
+          , data.spotlightAuthor&&(
+            React.createElement('div', { style: {background:"linear-gradient(135deg,#f5efea 0%,#eeecf5 100%)",border:"1px solid #ccc8c0",borderTop:"3px solid #6a4015",borderRadius:14,padding:"20px 22px",marginTop:24},}
+              , React.createElement('div', { style: {fontSize:9,color:"#6a4015",textTransform:"uppercase",letterSpacing:3,fontFamily:"monospace",fontWeight:700,marginBottom:10},}, "✦ Author Spotlight"  )
+              , React.createElement('div', { style: {fontSize:20,fontWeight:900,color:"#1e1e2a",marginBottom:2},}, data.spotlightAuthor.name)
+              , React.createElement('div', { style: {fontSize:11,color:"#9a9aaa",marginBottom:10},}, data.spotlightAuthor.booksCount, " books in catalogue"   )
+              , React.createElement('div', { style: {fontSize:13,color:"#4a4a5a",lineHeight:1.6,marginBottom:14},}, data.spotlightAuthor.why)
+              , React.createElement('div', { style: {background:"#faf9f7",border:"1px solid #d8d4cc",borderRadius:10,padding:"14px 18px",display:"inline-block"},}
+                , React.createElement('div', { style: {fontSize:9,color:"#9a9aaa",textTransform:"uppercase",letterSpacing:2,marginBottom:4},}, "Must-Read First" )
+                , React.createElement('div', { style: {fontSize:14,fontWeight:800,color:"#342058"},}, "\"", data.spotlightAuthor.mustRead, "\"")
+              )
+            )
+          )
+        )
+      )
+    )
   );
 }
 function LibraryTab({ books, setBooks }) {
@@ -876,63 +860,63 @@ function LibraryTab({ books, setBooks }) {
   },[filtered]);
 
   return(
-    <div style={{maxWidth:1400,margin:"0 auto",padding:"16px 24px"}}>
-      {showAI&&<AIModal onClose={()=>setShowAI(false)} onAdd={addBook}/>}
-      {showAdd&&<AddBookModal onClose={()=>setShowAdd(false)} onAdd={addBook} existingBooks={books}/>}
-      {showAddAuthor&&<AddAuthorModal onClose={()=>setShowAddAuthor(false)} onAddAll={addAuthorBooks} existingBooks={books}/>}
-      <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",marginBottom:14}}>
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍  Search title, author or tag…"
-          style={{background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#2c2c3a",fontSize:13,outline:"none",width:240}}/>
-        <AuthorDropdown books={books} selectedAuthor={selectedAuthor} onChange={setSelectedAuthor}/>
-        <select value={selectedGenre} onChange={e=>setSelectedGenre(e.target.value)}
-          style={{background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#3a3a4a",fontSize:13,cursor:"pointer",outline:"none",boxShadow:"0 1px 3px rgba(0,0,0,.06)"}}>
-          <option value="all">🎭 All Genres</option>
-          {GENRES.map(g=><option key={g} value={g}>{g}</option>)}
-        </select>
-        <select value={selectedYear} onChange={e=>setSelectedYear(e.target.value)}
-          style={{background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#3a3a4a",fontSize:13,cursor:"pointer",outline:"none",boxShadow:"0 1px 3px rgba(0,0,0,.06)"}}>
-          <option value="all">📅 All Years</option>
-          <option value="1800-1999">Before 2000</option>
-          <option value="2000-2004">2000 – 2004</option>
-          <option value="2005-2009">2005 – 2009</option>
-          <option value="2010-2014">2010 – 2014</option>
-          <option value="2015-2019">2015 – 2019</option>
-          <option value="2020-2025">2020 – 2025</option>
-        </select>
-        <div style={{marginLeft:"auto",display:"flex",gap:8}}>
-          <button onClick={()=>setShowAdd(true)} style={{background:"#28502a",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13}}>+ Add Book</button>
-          <button onClick={()=>setShowAddAuthor(true)} style={{background:"#1a4a6b",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13}}>👤 Add Author</button>
-          <button onClick={()=>setShowAI(true)} style={{background:"#7a3530",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13}}>✦ AI Discover</button>
-        </div>
-      </div>
-      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
-        <button onClick={()=>setActiveCat("all")} style={{padding:"5px 13px",borderRadius:20,border:`1.5px solid ${activeCat==="all"?"#7a3530":"#ccc8c0"}`,background:activeCat==="all"?"#ede0df":"#faf9f7",color:activeCat==="all"?"#7a3530":"#6a6a7a",cursor:"pointer",fontSize:11,fontWeight:600}}>All ({books.length})</button>
-        {CATEGORIES.map(c=>{const col=CAT_COLORS[c.id];const active=activeCat===c.id;return(
-          <button key={c.id} onClick={()=>setActiveCat(c.id)} style={{padding:"5px 13px",borderRadius:20,border:`1.5px solid ${active?col.accent:"#ccc8c0"}`,background:active?col.bg:"#faf9f7",color:active?col.accent:"#6a6a7a",cursor:"pointer",fontSize:11,fontWeight:600}}>
-            {c.emoji} {c.label} ({catCounts[c.id]||0})
-          </button>
-        );})}
-      </div>
-      <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:22}}>
-        {[["all","All"],["read","Read"],["unread","Unread"],["wishlist","Wishlist"],["nyt","NYT Only"]].map(([f,l])=>(
-          <button key={f} onClick={()=>setActiveFilter(f)} style={{padding:"4px 12px",borderRadius:20,border:"1px solid #ccc8c0",background:activeFilter===f?"#e8e4dc":"#faf9f7",color:activeFilter===f?"#3a3a4a":"#9a9aaa",cursor:"pointer",fontSize:11,fontWeight:activeFilter===f?600:400}}>{l}</button>
-        ))}
-        <span style={{marginLeft:"auto",color:"#9a9aaa",fontSize:11}}>{filtered.length} books{selectedGenre!=="all"?" · "+selectedGenre:""}{selectedYear!=="all"?" · "+selectedYear:""} · sorted by author → year</span>
-      </div>
-      {filtered.length===0?(
-        <div style={{textAlign:"center",padding:60,color:"#9a9aaa"}}><div style={{fontSize:40}}>📭</div><div style={{marginTop:10,fontSize:14}}>No books match.</div></div>
+    React.createElement('div', { style: {maxWidth:1400,margin:"0 auto",padding:"16px 24px"},}
+      , showAI&&React.createElement(AIModal, { onClose: ()=>setShowAI(false), onAdd: addBook,})
+      , showAdd&&React.createElement(AddBookModal, { onClose: ()=>setShowAdd(false), onAdd: addBook, existingBooks: books,})
+      , showAddAuthor&&React.createElement(AddAuthorModal, { onClose: ()=>setShowAddAuthor(false), onAddAll: addAuthorBooks, existingBooks: books,})
+      , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",marginBottom:14},}
+        , React.createElement('input', { value: search, onChange: e=>setSearch(e.target.value), placeholder: "🔍  Search title, author or tag…"      ,
+          style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#2c2c3a",fontSize:13,outline:"none",width:240},})
+        , React.createElement(AuthorDropdown, { books: books, selectedAuthor: selectedAuthor, onChange: setSelectedAuthor,})
+        , React.createElement('select', { value: selectedGenre, onChange: e=>setSelectedGenre(e.target.value),
+          style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#3a3a4a",fontSize:13,cursor:"pointer",outline:"none",boxShadow:"0 1px 3px rgba(0,0,0,.06)"},}
+          , React.createElement('option', { value: "all",}, "🎭 All Genres"  )
+          , GENRES.map(g=>React.createElement('option', { key: g, value: g,}, g))
+        )
+        , React.createElement('select', { value: selectedYear, onChange: e=>setSelectedYear(e.target.value),
+          style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#3a3a4a",fontSize:13,cursor:"pointer",outline:"none",boxShadow:"0 1px 3px rgba(0,0,0,.06)"},}
+          , React.createElement('option', { value: "all",}, "📅 All Years"  )
+          , React.createElement('option', { value: "1800-1999",}, "Before 2000" )
+          , React.createElement('option', { value: "2000-2004",}, "2000 – 2004"  )
+          , React.createElement('option', { value: "2005-2009",}, "2005 – 2009"  )
+          , React.createElement('option', { value: "2010-2014",}, "2010 – 2014"  )
+          , React.createElement('option', { value: "2015-2019",}, "2015 – 2019"  )
+          , React.createElement('option', { value: "2020-2025",}, "2020 – 2025"  )
+        )
+        , React.createElement('div', { style: {marginLeft:"auto",display:"flex",gap:8},}
+          , React.createElement('button', { onClick: ()=>setShowAdd(true), style: {background:"#28502a",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13},}, "+ Add Book"  )
+          , React.createElement('button', { onClick: ()=>setShowAddAuthor(true), style: {background:"#1a4a6b",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13},}, "👤 Add Author"  )
+          , React.createElement('button', { onClick: ()=>setShowAI(true), style: {background:"#7a3530",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13},}, "✦ AI Discover"  )
+        )
+      )
+      , React.createElement('div', { style: {display:"flex",gap:6,flexWrap:"wrap",marginBottom:8},}
+        , React.createElement('button', { onClick: ()=>setActiveCat("all"), style: {padding:"5px 13px",borderRadius:20,border:`1.5px solid ${activeCat==="all"?"#7a3530":"#ccc8c0"}`,background:activeCat==="all"?"#ede0df":"#faf9f7",color:activeCat==="all"?"#7a3530":"#6a6a7a",cursor:"pointer",fontSize:11,fontWeight:600},}, "All (" , books.length, ")")
+        , CATEGORIES.map(c=>{const col=CAT_COLORS[c.id];const active=activeCat===c.id;return(
+          React.createElement('button', { key: c.id, onClick: ()=>setActiveCat(c.id), style: {padding:"5px 13px",borderRadius:20,border:`1.5px solid ${active?col.accent:"#ccc8c0"}`,background:active?col.bg:"#faf9f7",color:active?col.accent:"#6a6a7a",cursor:"pointer",fontSize:11,fontWeight:600},}
+            , c.emoji, " " , c.label, " (" , catCounts[c.id]||0, ")"
+          )
+        );})
+      )
+      , React.createElement('div', { style: {display:"flex",gap:6,alignItems:"center",marginBottom:22},}
+        , [["all","All"],["read","Read"],["unread","Unread"],["wishlist","Wishlist"],["nyt","NYT Only"]].map(([f,l])=>(
+          React.createElement('button', { key: f, onClick: ()=>setActiveFilter(f), style: {padding:"4px 12px",borderRadius:20,border:"1px solid #ccc8c0",background:activeFilter===f?"#e8e4dc":"#faf9f7",color:activeFilter===f?"#3a3a4a":"#9a9aaa",cursor:"pointer",fontSize:11,fontWeight:activeFilter===f?600:400},}, l)
+        ))
+        , React.createElement('span', { style: {marginLeft:"auto",color:"#9a9aaa",fontSize:11},}, filtered.length, " books" , selectedGenre!=="all"?" · "+selectedGenre:"", selectedYear!=="all"?" · "+selectedYear:"", " · sorted by author → year"      )
+      )
+      , filtered.length===0?(
+        React.createElement('div', { style: {textAlign:"center",padding:60,color:"#9a9aaa"},}, React.createElement('div', { style: {fontSize:40},}, "📭"), React.createElement('div', { style: {marginTop:10,fontSize:14},}, "No books match."  ))
       ):(
         authorGroups.map(([author,abooks])=>{
           const col=CAT_COLORS[abooks[0].cat]||CAT_COLORS.british_thriller;
           const readCount=abooks.filter(b=>b.read).length;
           const pct=Math.round(readCount/abooks.length*100);
           return(
-            <AuthorSection key={author} author={author} abooks={abooks} col={col} readCount={readCount} pct={pct}
-              onToggleRead={toggleRead} onToggleWishlist={toggleWishlist} onDelete={deleteBook}/>
+            React.createElement(AuthorSection, { key: author, author: author, abooks: abooks, col: col, readCount: readCount, pct: pct,
+              onToggleRead: toggleRead, onToggleWishlist: toggleWishlist, onDelete: deleteBook,})
           );
         })
-      )}
-    </div>
+      )
+    )
   );
 }
 
@@ -966,46 +950,46 @@ function AuthScreen({ onAuth }) {
   };
 
   return (
-    <div style={{minHeight:"100vh",background:"#f0ede8",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-      <div style={{background:"#faf9f7",border:"1px solid #d8d4cc",borderRadius:20,padding:"36px 32px",width:"100%",maxWidth:400,boxShadow:"0 20px 60px rgba(0,0,0,.10)"}}>
-        <div style={{textAlign:"center",marginBottom:28}}>
-          <div style={{fontSize:36,marginBottom:10}}>📚</div>
-          <div style={{fontSize:9,color:"#7a3530",letterSpacing:4,textTransform:"uppercase",fontFamily:"monospace",fontWeight:700,marginBottom:6}}>◆ PERSONAL READING VAULT</div>
-          <div style={{fontSize:22,fontWeight:900,color:"#1e1e2a"}}>My Book Library</div>
-          <div style={{fontSize:12,color:"#9a9aaa",marginTop:4}}>{mode==="signup"?"Create your account":mode==="forgot"?"Reset your password":"Welcome back"}</div>
-        </div>
+    React.createElement('div', { style: {minHeight:"100vh",background:"#f0ede8",display:"flex",alignItems:"center",justifyContent:"center",padding:20},}
+      , React.createElement('div', { style: {background:"#faf9f7",border:"1px solid #d8d4cc",borderRadius:20,padding:"36px 32px",width:"100%",maxWidth:400,boxShadow:"0 20px 60px rgba(0,0,0,.10)"},}
+        , React.createElement('div', { style: {textAlign:"center",marginBottom:28},}
+          , React.createElement('div', { style: {fontSize:36,marginBottom:10},}, "📚")
+          , React.createElement('div', { style: {fontSize:9,color:"#7a3530",letterSpacing:4,textTransform:"uppercase",fontFamily:"monospace",fontWeight:700,marginBottom:6},}, "◆ PERSONAL READING VAULT"   )
+          , React.createElement('div', { style: {fontSize:22,fontWeight:900,color:"#1e1e2a"},}, "My Book Library"  )
+          , React.createElement('div', { style: {fontSize:12,color:"#9a9aaa",marginTop:4},}, mode==="signup"?"Create your account":mode==="forgot"?"Reset your password":"Welcome back")
+        )
 
-        {error && <div style={{background:"#f5eeee",border:"1px solid #d4b8b5",borderRadius:10,padding:"10px 14px",color:"#7a3530",fontSize:12,marginBottom:16}}>{error}</div>}
-        {message && <div style={{background:"#eaf2ea",border:"1px solid #b0ccb0",borderRadius:10,padding:"10px 14px",color:"#28622a",fontSize:12,marginBottom:16}}>{message}</div>}
+        , error && React.createElement('div', { style: {background:"#f5eeee",border:"1px solid #d4b8b5",borderRadius:10,padding:"10px 14px",color:"#7a3530",fontSize:12,marginBottom:16},}, error)
+        , message && React.createElement('div', { style: {background:"#eaf2ea",border:"1px solid #b0ccb0",borderRadius:10,padding:"10px 14px",color:"#28622a",fontSize:12,marginBottom:16},}, message)
 
-        <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:16}}>
-          <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
-            placeholder="Email address"
-            style={{background:"#f0ede8",border:"1.5px solid #ccc8c0",borderRadius:10,padding:"12px 14px",fontSize:14,outline:"none",color:"#1e1e2a"}}/>
-          {mode !== "forgot" && (
-            <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
-              onKeyDown={e=>e.key==="Enter"&&handle()}
-              placeholder="Password"
-              style={{background:"#f0ede8",border:"1.5px solid #ccc8c0",borderRadius:10,padding:"12px 14px",fontSize:14,outline:"none",color:"#1e1e2a"}}/>
-          )}
-        </div>
+        , React.createElement('div', { style: {display:"flex",flexDirection:"column",gap:10,marginBottom:16},}
+          , React.createElement('input', { type: "email", value: email, onChange: e=>setEmail(e.target.value),
+            placeholder: "Email address" ,
+            style: {background:"#f0ede8",border:"1.5px solid #ccc8c0",borderRadius:10,padding:"12px 14px",fontSize:14,outline:"none",color:"#1e1e2a"},})
+          , mode !== "forgot" && (
+            React.createElement('input', { type: "password", value: password, onChange: e=>setPassword(e.target.value),
+              onKeyDown: e=>e.key==="Enter"&&handle(),
+              placeholder: "Password",
+              style: {background:"#f0ede8",border:"1.5px solid #ccc8c0",borderRadius:10,padding:"12px 14px",fontSize:14,outline:"none",color:"#1e1e2a"},})
+          )
+        )
 
-        <button onClick={handle} disabled={loading}
-          style={{width:"100%",background:loading?"#c0bcb4":"#7a3530",border:"none",borderRadius:10,padding:"13px 0",color:"#fff",fontWeight:800,fontSize:14,cursor:loading?"default":"pointer",marginBottom:14}}>
-          {loading ? "⟳ Please wait…" : mode==="signup" ? "Create Account" : mode==="forgot" ? "Send Reset Email" : "Sign In"}
-        </button>
+        , React.createElement('button', { onClick: handle, disabled: loading,
+          style: {width:"100%",background:loading?"#c0bcb4":"#7a3530",border:"none",borderRadius:10,padding:"13px 0",color:"#fff",fontWeight:800,fontSize:14,cursor:loading?"default":"pointer",marginBottom:14},}
+          , loading ? "⟳ Please wait…" : mode==="signup" ? "Create Account" : mode==="forgot" ? "Send Reset Email" : "Sign In"
+        )
 
-        <div style={{display:"flex",justifyContent:"center",gap:16,fontSize:12,color:"#7a7a8a"}}>
-          {mode==="login" && <>
-            <span onClick={()=>{setMode("signup");setError("");setMessage("");}} style={{cursor:"pointer",color:"#7a3530",fontWeight:600}}>Create account</span>
-            <span>·</span>
-            <span onClick={()=>{setMode("forgot");setError("");setMessage("");}} style={{cursor:"pointer",color:"#7a3530"}}>Forgot password?</span>
-          </>}
-          {mode==="signup" && <span onClick={()=>{setMode("login");setError("");setMessage("");}} style={{cursor:"pointer",color:"#7a3530",fontWeight:600}}>← Back to sign in</span>}
-          {mode==="forgot" && <span onClick={()=>{setMode("login");setError("");setMessage("");}} style={{cursor:"pointer",color:"#7a3530",fontWeight:600}}>← Back to sign in</span>}
-        </div>
-      </div>
-    </div>
+        , React.createElement('div', { style: {display:"flex",justifyContent:"center",gap:16,fontSize:12,color:"#7a7a8a"},}
+          , mode==="login" && React.createElement(React.Fragment, null
+            , React.createElement('span', { onClick: ()=>{setMode("signup");setError("");setMessage("");}, style: {cursor:"pointer",color:"#7a3530",fontWeight:600},}, "Create account" )
+            , React.createElement('span', null, "·")
+            , React.createElement('span', { onClick: ()=>{setMode("forgot");setError("");setMessage("");}, style: {cursor:"pointer",color:"#7a3530"},}, "Forgot password?" )
+          )
+          , mode==="signup" && React.createElement('span', { onClick: ()=>{setMode("login");setError("");setMessage("");}, style: {cursor:"pointer",color:"#7a3530",fontWeight:600},}, "← Back to sign in"    )
+          , mode==="forgot" && React.createElement('span', { onClick: ()=>{setMode("login");setError("");setMessage("");}, style: {cursor:"pointer",color:"#7a3530",fontWeight:600},}, "← Back to sign in"    )
+        )
+      )
+    )
   );
 }
 
@@ -1040,40 +1024,40 @@ function ApiKeyBanner() {
   useEffect(() => { if (key) window._claudeApiKey = key; }, []);
 
   return (
-    <div style={{background: hasKey ? "#eaf2ea" : "#f5efea", borderBottom: "1px solid " + (hasKey ? "#b0ccb0" : "#cdb898"), padding:"10px 24px", fontSize:12}}>
-      <div style={{maxWidth:1400, margin:"0 auto", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap"}}>
-        <span style={{fontSize:14}}>{hasKey ? "🔑" : "⚠️"}</span>
-        {hasKey ? (
-          <>
-            <span style={{color:"#28622a", fontWeight:600}}>API key set — AI features active</span>
-            {saved && <span style={{color:"#28622a"}}>✓ Saved!</span>}
-            <button onClick={removeKey} style={{background:"none", border:"1px solid #b0ccb0", borderRadius:6, padding:"3px 10px", color:"#6a8a6a", cursor:"pointer", fontSize:11}}>Remove key</button>
-          </>
+    React.createElement('div', { style: {background: hasKey ? "#eaf2ea" : "#f5efea", borderBottom: "1px solid " + (hasKey ? "#b0ccb0" : "#cdb898"), padding:"10px 24px", fontSize:12},}
+      , React.createElement('div', { style: {maxWidth:1400, margin:"0 auto", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap"},}
+        , React.createElement('span', { style: {fontSize:14},}, hasKey ? "🔑" : "⚠️")
+        , hasKey ? (
+          React.createElement(React.Fragment, null
+            , React.createElement('span', { style: {color:"#28622a", fontWeight:600},}, "API key set — AI features active"      )
+            , saved && React.createElement('span', { style: {color:"#28622a"},}, "✓ Saved!" )
+            , React.createElement('button', { onClick: removeKey, style: {background:"none", border:"1px solid #b0ccb0", borderRadius:6, padding:"3px 10px", color:"#6a8a6a", cursor:"pointer", fontSize:11},}, "Remove key" )
+          )
         ) : (
-          <>
-            <span style={{color:"#6a4015", fontWeight:600}}>Add Anthropic API key to enable AI features</span>
-            {!show ? (
-              <button onClick={() => setShow(true)} style={{background:"#7a3530", border:"none", borderRadius:6, padding:"4px 12px", color:"#fff", cursor:"pointer", fontSize:11, fontWeight:600}}>+ Add Key</button>
+          React.createElement(React.Fragment, null
+            , React.createElement('span', { style: {color:"#6a4015", fontWeight:600},}, "Add Anthropic API key to enable AI features"       )
+            , !show ? (
+              React.createElement('button', { onClick: () => setShow(true), style: {background:"#7a3530", border:"none", borderRadius:6, padding:"4px 12px", color:"#fff", cursor:"pointer", fontSize:11, fontWeight:600},}, "+ Add Key"  )
             ) : (
-              <div style={{display:"flex", gap:6, alignItems:"center"}}>
-                <input
-                  type="password"
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && saveKey()}
-                  placeholder="sk-ant-..."
-                  style={{background:"#faf9f7", border:"1px solid #ccc8c0", borderRadius:6, padding:"5px 10px", fontSize:12, outline:"none", width:260}}
-                  autoFocus
-                />
-                <button onClick={saveKey} style={{background:"#7a3530", border:"none", borderRadius:6, padding:"5px 12px", color:"#fff", cursor:"pointer", fontSize:11, fontWeight:600}}>Save</button>
-                <button onClick={() => setShow(false)} style={{background:"none", border:"1px solid #ccc8c0", borderRadius:6, padding:"5px 10px", color:"#9a9aaa", cursor:"pointer", fontSize:11}}>Cancel</button>
-              </div>
-            )}
-            <a href="https://console.anthropic.com" target="_blank" style={{color:"#7a3530", fontSize:11, marginLeft:4}}>Get a free key →</a>
-          </>
-        )}
-      </div>
-    </div>
+              React.createElement('div', { style: {display:"flex", gap:6, alignItems:"center"},}
+                , React.createElement('input', {
+                  type: "password",
+                  value: input,
+                  onChange: e => setInput(e.target.value),
+                  onKeyDown: e => e.key === "Enter" && saveKey(),
+                  placeholder: "sk-ant-...",
+                  style: {background:"#faf9f7", border:"1px solid #ccc8c0", borderRadius:6, padding:"5px 10px", fontSize:12, outline:"none", width:260},
+                  autoFocus: true,}
+                )
+                , React.createElement('button', { onClick: saveKey, style: {background:"#7a3530", border:"none", borderRadius:6, padding:"5px 12px", color:"#fff", cursor:"pointer", fontSize:11, fontWeight:600},}, "Save")
+                , React.createElement('button', { onClick: () => setShow(false), style: {background:"none", border:"1px solid #ccc8c0", borderRadius:6, padding:"5px 10px", color:"#9a9aaa", cursor:"pointer", fontSize:11},}, "Cancel")
+              )
+            )
+            , React.createElement('a', { href: "https://console.anthropic.com", target: "_blank", style: {color:"#7a3530", fontSize:11, marginLeft:4},}, "Get a free key →"    )
+          )
+        )
+      )
+    )
   );
 }
 
@@ -1094,8 +1078,8 @@ function App() {
         .select('*')
         .order('id');
       if (error) {
-        console.error('Supabase error:', JSON.stringify(error), error?.message, error?.code, error?.details, error?.hint);
-        throw new Error(error?.message || error?.code || JSON.stringify(error));
+        console.error('Supabase error:', JSON.stringify(error), _optionalChain([error, 'optionalAccess', _20 => _20.message]), _optionalChain([error, 'optionalAccess', _21 => _21.code]), _optionalChain([error, 'optionalAccess', _22 => _22.details]), _optionalChain([error, 'optionalAccess', _23 => _23.hint]));
+        throw new Error(_optionalChain([error, 'optionalAccess', _24 => _24.message]) || _optionalChain([error, 'optionalAccess', _25 => _25.code]) || JSON.stringify(error));
       }
       if (!data || data.length === 0) {
         console.warn('Books table returned 0 rows — check RLS policy allows anon select');
@@ -1103,10 +1087,10 @@ function App() {
       window._BASE_BOOKS = data || [];
       setBooks((data||[]).map(b=>({...b, tags: Array.isArray(b.tags)?b.tags:(b.tags||[]), read:false, wishlist:false})));
     } catch(e) {
-      console.error('Failed to load books:', e?.message || e);
+      console.error('Failed to load books:', _optionalChain([e, 'optionalAccess', _26 => _26.message]) || e);
       setBooksLoading(false);
       // Show error to user
-      alert('Could not load books from database.\n\nError: ' + (e?.message || JSON.stringify(e)) + '\n\nCheck Supabase RLS policy allows anon SELECT on books table.');
+      alert('Could not load books from database.\n\nError: ' + (_optionalChain([e, 'optionalAccess', _27 => _27.message]) || JSON.stringify(e)) + '\n\nCheck Supabase RLS policy allows anon SELECT on books table.');
       window._BASE_BOOKS = [];
       return;
     }
@@ -1119,11 +1103,11 @@ function App() {
   // Check auth on mount + listen for changes
   useEffect(()=>{
     supabase.auth.getSession().then(({data:{session}})=>{
-      if(session?.user){ setUser(session.user); loadAndMerge(session.user.id); }
+      if(_optionalChain([session, 'optionalAccess', _28 => _28.user])){ setUser(session.user); loadAndMerge(session.user.id); }
       setAuthLoading(false);
     });
     const {data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
-      if(session?.user){ setUser(session.user); loadAndMerge(session.user.id); }
+      if(_optionalChain([session, 'optionalAccess', _29 => _29.user])){ setUser(session.user); loadAndMerge(session.user.id); }
       else{ setUser(null); loadBaseBooks(); }
     });
     return ()=>subscription.unsubscribe();
@@ -1133,12 +1117,12 @@ function App() {
     setSyncing(true);
     const saved=await loadStates(userId);
     setBooks(()=>{
-      const extraBooks=Object.values(saved).filter(r=>r.extra_data?.isExtra).map(r=>r.extra_data.book).filter(Boolean);
+      const extraBooks=Object.values(saved).filter(r=>_optionalChain([r, 'access', _30 => _30.extra_data, 'optionalAccess', _31 => _31.isExtra])).map(r=>r.extra_data.book).filter(Boolean);
       const base=window._BASE_BOOKS.map(b=>({
         ...b,
-        read:saved[String(b.id)]?.read||false,
-        wishlist:saved[String(b.id)]?.wishlist||false,
-        rating:saved[String(b.id)]?.rating||b.rating,
+        read:_optionalChain([saved, 'access', _32 => _32[String(b.id)], 'optionalAccess', _33 => _33.read])||false,
+        wishlist:_optionalChain([saved, 'access', _34 => _34[String(b.id)], 'optionalAccess', _35 => _35.wishlist])||false,
+        rating:_optionalChain([saved, 'access', _36 => _36[String(b.id)], 'optionalAccess', _37 => _37.rating])||b.rating,
       }));
       const titles=new Set(base.map(b=>b.title.toLowerCase()));
       const newBooks=extraBooks.filter(b=>!titles.has(b.title.toLowerCase()));
@@ -1177,73 +1161,52 @@ function App() {
   };
 
   if(authLoading||booksLoading) return(
-    <div style={{minHeight:"100vh",background:"#f0ede8",display:"flex",alignItems:"center",justifyContent:"center"}}>
-      <div style={{textAlign:"center"}}><div style={{fontSize:36,animation:"spin 1s linear infinite",display:"inline-block"}}>◎</div><div style={{color:"#9a9aaa",fontSize:14,marginTop:12}}>Loading…</div></div>
-    </div>
+    React.createElement('div', { style: {minHeight:"100vh",background:"#f0ede8",display:"flex",alignItems:"center",justifyContent:"center"},}
+      , React.createElement('div', { style: {textAlign:"center"},}, React.createElement('div', { style: {fontSize:36,animation:"spin 1s linear infinite",display:"inline-block"},}, "◎"), React.createElement('div', { style: {color:"#9a9aaa",fontSize:14,marginTop:12},}, "Loading…"))
+    )
   );
 
-  if(!user) return <AuthScreen onAuth={u=>{setUser(u);loadAndMerge(u.id);}}/>;
+  if(!user) return React.createElement(AuthScreen, { onAuth: u=>{setUser(u);loadAndMerge(u.id);},});
 
   return(
-    <div style={{minHeight:"100vh",background:"#f0ede8",color:"#2c2c3a"}}>
-      <ApiKeyBanner/>
-      <div style={{background:"#f5f2ee",borderBottom:"1px solid #d8d4cc",padding:"18px 24px 0",boxShadow:"0 1px 4px rgba(0,0,0,.06)",position:"sticky",top:0,zIndex:100}}>
-        <div style={{maxWidth:1400,margin:"0 auto"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:14,marginBottom:14}}>
-            <div>
-              <div style={{fontSize:9,color:"#7a3530",letterSpacing:4,textTransform:"uppercase",fontFamily:"monospace",fontWeight:700,marginBottom:4}}>◆ PERSONAL READING VAULT</div>
-              <h1 style={{fontSize:22,fontWeight:900,margin:0,color:"#1e1e2a"}}>My Book Library {syncing&&<span style={{fontSize:10,color:"#9a9aaa",fontWeight:400,marginLeft:6}}>⟳ syncing…</span>}</h1>
-            </div>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
-              <button onClick={()=>supabase.auth.signOut()} style={{background:"none",border:"1px solid #ccc8c0",borderRadius:8,padding:"5px 12px",color:"#9a9aaa",cursor:"pointer",fontSize:11}}>Sign out</button>
-              {[["📚",stats.total,"Total","#edeaf5","#342058"],["✓",stats.read,"Read","#eaf2ea","#28622a"],["♥",stats.wishlist,"Wishlist","#f2ebe6","#8a4a18"],["📰",stats.nyt,"NYT","#f2e8e8","#8b2e2e"]].map(([icon,val,label,bg,color])=>(
-                <div key={label} style={{background:bg,border:`1px solid ${color}30`,borderRadius:9,padding:"6px 12px",textAlign:"center",minWidth:52}}>
-                  <div style={{fontSize:12}}>{icon}</div><div style={{fontSize:16,fontWeight:800,color}}>{val}</div><div style={{fontSize:8,color:"#9a9aaa",textTransform:"uppercase",letterSpacing:1}}>{label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={{display:"flex",gap:0}}>
-            {[{id:"library",label:"📖 My Library",count:books.length},{id:"recommendations",label:"✦ Recommendations",count:null}].map(tab=>(
-              <button key={tab.id} onClick={()=>setActiveTab(tab.id)} style={{padding:"10px 22px",background:"none",border:"none",borderBottom:`3px solid ${activeTab===tab.id?"#7a3530":"transparent"}`,color:activeTab===tab.id?"#7a3530":"#9a9aaa",fontWeight:activeTab===tab.id?800:500,fontSize:13,cursor:"pointer",marginBottom:-1,display:"flex",alignItems:"center",gap:6}}>
-                {tab.label}
-                {tab.count!==null&&<span style={{background:activeTab===tab.id?"#ede0df":"#e8e4dc",color:activeTab===tab.id?"#7a3530":"#9a9aaa",fontSize:10,padding:"1px 7px",borderRadius:20,fontWeight:700}}>{tab.count}</span>}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-      {activeTab==="library"&&<LibraryTab books={books} setBooks={syncedSetBooks}/>}
-      {activeTab==="recommendations"&&<RecommendationsTab onAddToLibrary={addToLibrary}/>}
-    </div>
+    React.createElement('div', { style: {minHeight:"100vh",background:"#f0ede8",color:"#2c2c3a"},}
+      , React.createElement(ApiKeyBanner, null)
+      , React.createElement('div', { style: {background:"#f5f2ee",borderBottom:"1px solid #d8d4cc",padding:"18px 24px 0",boxShadow:"0 1px 4px rgba(0,0,0,.06)",position:"sticky",top:0,zIndex:100},}
+        , React.createElement('div', { style: {maxWidth:1400,margin:"0 auto"},}
+          , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:14,marginBottom:14},}
+            , React.createElement('div', null
+              , React.createElement('div', { style: {fontSize:9,color:"#7a3530",letterSpacing:4,textTransform:"uppercase",fontFamily:"monospace",fontWeight:700,marginBottom:4},}, "◆ PERSONAL READING VAULT"   )
+              , React.createElement('h1', { style: {fontSize:22,fontWeight:900,margin:0,color:"#1e1e2a"},}, "My Book Library "   , syncing&&React.createElement('span', { style: {fontSize:10,color:"#9a9aaa",fontWeight:400,marginLeft:6},}, "⟳ syncing…" ))
+            )
+            , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"},}
+              , React.createElement('button', { onClick: ()=>supabase.auth.signOut(), style: {background:"none",border:"1px solid #ccc8c0",borderRadius:8,padding:"5px 12px",color:"#9a9aaa",cursor:"pointer",fontSize:11},}, "Sign out" )
+              , [["📚",stats.total,"Total","#edeaf5","#342058"],["✓",stats.read,"Read","#eaf2ea","#28622a"],["♥",stats.wishlist,"Wishlist","#f2ebe6","#8a4a18"],["📰",stats.nyt,"NYT","#f2e8e8","#8b2e2e"]].map(([icon,val,label,bg,color])=>(
+                React.createElement('div', { key: label, style: {background:bg,border:`1px solid ${color}30`,borderRadius:9,padding:"6px 12px",textAlign:"center",minWidth:52},}
+                  , React.createElement('div', { style: {fontSize:12},}, icon), React.createElement('div', { style: {fontSize:16,fontWeight:800,color},}, val), React.createElement('div', { style: {fontSize:8,color:"#9a9aaa",textTransform:"uppercase",letterSpacing:1},}, label)
+                )
+              ))
+            )
+          )
+          , React.createElement('div', { style: {display:"flex",gap:0},}
+            , [{id:"library",label:"📖 My Library",count:books.length},{id:"recommendations",label:"✦ Recommendations",count:null}].map(tab=>(
+              React.createElement('button', { key: tab.id, onClick: ()=>setActiveTab(tab.id), style: {padding:"10px 22px",background:"none",border:"none",borderBottom:`3px solid ${activeTab===tab.id?"#7a3530":"transparent"}`,color:activeTab===tab.id?"#7a3530":"#9a9aaa",fontWeight:activeTab===tab.id?800:500,fontSize:13,cursor:"pointer",marginBottom:-1,display:"flex",alignItems:"center",gap:6},}
+                , tab.label
+                , tab.count!==null&&React.createElement('span', { style: {background:activeTab===tab.id?"#ede0df":"#e8e4dc",color:activeTab===tab.id?"#7a3530":"#9a9aaa",fontSize:10,padding:"1px 7px",borderRadius:20,fontWeight:700},}, tab.count)
+              )
+            ))
+          )
+        )
+      )
+      , activeTab==="library"&&React.createElement(LibraryTab, { books: books, setBooks: syncedSetBooks,})
+      , activeTab==="recommendations"&&React.createElement(RecommendationsTab, { onAddToLibrary: addToLibrary,})
+    )
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
-</script>
-<script>
-// Manually compile JSX after all scripts load - Safari compatible
-function runApp() {
-  try {
-    var src = document.getElementById('jsx-source').textContent;
-    var compiled = Babel.transform(src, {
-      presets: [['react'], ['env', {targets: {browsers: ['last 2 versions', 'safari >= 12']}}]]
-    }).code;
-    var script = document.createElement('script');
-    script.textContent = compiled;
-    document.head.appendChild(script);
-  } catch(e) {
-    document.getElementById('root').innerHTML = '<div style="padding:40px;text-align:center;font-family:sans-serif"><h2>⚠️ Load Error</h2><pre style="background:#f5f5f5;padding:16px;border-radius:8px;text-align:left;overflow:auto;font-size:11px">' + e.message + '</pre></div>';
-    console.error('Babel compile error:', e);
-  }
-}
-// Wait for Babel to load
-if (typeof Babel !== 'undefined') {
-  runApp();
-} else {
-  document.querySelector('script[src*="babel"]').addEventListener('load', runApp);
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App, null));
 }
 </script>
+
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
