@@ -177,7 +177,8 @@ function AuthorSection({ author, abooks, col, readCount, pct, onToggleRead, onTo
         /* Chevron */
         , React.createElement('div', { style: {fontSize:11,color:col.accent,transition:"transform .2s",transform:collapsed?"rotate(-90deg)":"rotate(0deg)",flexShrink:0},}, "▼")
 
-
+        /* Author name */
+        , React.createElement('div', { style: {flex:1,fontSize:13,fontWeight:700,color:"#2c2c2c"},}, author)
 
         /* Stats row */
         , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:8,flexShrink:0},}
@@ -821,13 +822,18 @@ function LibraryTab({ books, setBooks }) {
   const toggleRead=id=>setBooks(bs=>bs.map(b=>b.id===id?{...b,read:!b.read}:b));
   const toggleWishlist=id=>setBooks(bs=>bs.map(b=>b.id===id?{...b,wishlist:!b.wishlist}:b));
   const deleteBook=async(id)=>{
-    // Coerce to same type for comparison (Supabase returns integers)
     setBooks(bs=>bs.filter(b=>String(b.id)!==String(id)));
-    // Delete from books table (hard delete)
-    const {error} = await supabase.from('books').delete().eq('id', id);
-    if(error) console.error('Delete book error:', error.message);
-    // Also clean up any book_states entry
-    if(user) await deleteState(user.id, id);
+    if(user){
+      // Save hidden flag in book_states (books table is read-only for users)
+      await supabase.from('book_states').upsert({
+        user_id: user.id,
+        book_id: String(id),
+        read: false,
+        wishlist: false,
+        extra_data: {hidden: true},
+        updated_at: new Date().toISOString()
+      }, {onConflict:'user_id,book_id'});
+    }
   };
   const addBook=book=>{setBooks(bs=>[{...book,id:Date.now()+Math.random(),...(!book.read&&{read:false}),...(!book.wishlist&&{wishlist:false})},bs.filter(b=>b.title.toLowerCase()!==book.title.toLowerCase())].flat());setShowAI(false);setShowAdd(false);};
 
