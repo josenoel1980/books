@@ -822,17 +822,31 @@ function LibraryTab({ books, setBooks }) {
   const toggleRead=id=>setBooks(bs=>bs.map(b=>b.id===id?{...b,read:!b.read}:b));
   const toggleWishlist=id=>setBooks(bs=>bs.map(b=>b.id===id?{...b,wishlist:!b.wishlist}:b));
   const deleteBook=async(id)=>{
-    setBooks(bs=>bs.filter(b=>String(b.id)!==String(id)));
+    const sid = String(id);
+    console.log('deleteBook called, id=', id, 'sid=', sid);
+    // 1. Remove from local state immediately
+    setBooks(bs=>{
+      console.log('books before filter:', bs.length, 'ids sample:', bs.slice(0,3).map(b=>b.id));
+      const next = bs.filter(b=>String(b.id)!==sid);
+      console.log('books after filter:', next.length);
+      return next;
+    });
+    // 2. Persist in localStorage so it survives refresh without auth
+    try {
+      const hidden = JSON.parse(localStorage.getItem('hidden_books')||'[]');
+      if(!hidden.includes(sid)) { hidden.push(sid); localStorage.setItem('hidden_books', JSON.stringify(hidden)); }
+    } catch(e) {}
+    // 3. Also persist in Supabase if logged in
     if(user){
-      // Save hidden flag in book_states (books table is read-only for users)
-      await supabase.from('book_states').upsert({
+      const {error} = await supabase.from('book_states').upsert({
         user_id: user.id,
-        book_id: String(id),
+        book_id: sid,
         read: false,
         wishlist: false,
         extra_data: {hidden: true},
         updated_at: new Date().toISOString()
       }, {onConflict:'user_id,book_id'});
+      if(error) console.error('Delete save error:', error.message);
     }
   };
   const addBook=book=>{setBooks(bs=>[{...book,id:Date.now()+Math.random(),...(!book.read&&{read:false}),...(!book.wishlist&&{wishlist:false})},bs.filter(b=>b.title.toLowerCase()!==book.title.toLowerCase())].flat());setShowAI(false);setShowAdd(false);};
@@ -1111,7 +1125,8 @@ function App() {
         console.warn('Books table returned 0 rows — check RLS policy allows anon select');
       }
       window._BASE_BOOKS = data || [];
-      setBooks((data||[]).map(b=>({...b, tags: Array.isArray(b.tags)?b.tags:(b.tags||[]), read:false, wishlist:false})));
+      const hiddenIds = new Set(JSON.parse(localStorage.getItem('hidden_books')||'[]'));
+      setBooks((data||[]).filter(b=>!hiddenIds.has(String(b.id))).map(b=>({...b, tags: Array.isArray(b.tags)?b.tags:(b.tags||[]), read:false, wishlist:false})));
       setBooksLoading(false);
       return window._BASE_BOOKS;
     } catch(e) {
@@ -1153,8 +1168,9 @@ function App() {
     const books = baseBooks && baseBooks.length ? baseBooks : (window._BASE_BOOKS||[]);
     const saved=await loadStates(userId);
     const extraBooks=Object.values(saved).filter(r=>_optionalChain([r, 'access', _32 => _32.extra_data, 'optionalAccess', _33 => _33.isExtra])).map(r=>r.extra_data.book).filter(Boolean);
+    const hiddenIds = new Set(JSON.parse(localStorage.getItem('hidden_books')||'[]'));
     const base=books
-      .filter(b=>!_optionalChain([saved, 'access', _34 => _34[String(b.id)], 'optionalAccess', _35 => _35.extra_data, 'optionalAccess', _36 => _36.hidden]))
+      .filter(b=>!hiddenIds.has(String(b.id)) && !_optionalChain([saved, 'access', _34 => _34[String(b.id)], 'optionalAccess', _35 => _35.extra_data, 'optionalAccess', _36 => _36.hidden]))
       .map(b=>({
         ...b,
         read:_optionalChain([saved, 'access', _37 => _37[String(b.id)], 'optionalAccess', _38 => _38.read])||false,
