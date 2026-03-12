@@ -106,6 +106,18 @@ const CATEGORIES = [
   { id: "nonfiction",       label: "Non-Fiction",      emoji: "📚" },
   { id: "self_help",        label: "Self-Help",        emoji: "💡" },
 ];
+
+const CAT_CHARACTER = {
+  vince_flynn:      "Mitch Rapp",
+  kyle_mills:       "Mitch Rapp",
+  brad_thor:        "Scot Harvath",
+  mark_greaney:     "Gray Man",
+  jack_carr:        "James Reece",
+  michael_connelly: "Bosch / Haller",
+  harlan_coben:     "Myron Bolitar",
+  david_baldacci:   "Amos Decker",
+};
+
 const CAT_COLORS = {
   vince_flynn:      { bg:"#f5eeee", border:"#d4b8b5", accent:"#7a3530", tag:"#e8d5d3", tagText:"#5c2420" },
   kyle_mills:       { bg:"#f5eef0", border:"#d4b0b8", accent:"#6a2040", tag:"#e8d0d8", tagText:"#4e1430" },
@@ -213,15 +225,22 @@ function BookCover({ title, author, col }) {
     setTried(true);
     // Try Google Books API first (most reliable)
     const q = encodeURIComponent(title + " " + author);
-    fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1&fields=items(volumeInfo/imageLinks)`)
+    // Try Google Books first, then Open Library
+    fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=3&fields=items(volumeInfo/imageLinks,volumeInfo/title)`)
       .then(r => r.json())
       .then(d => {
-        const thumb = _optionalChain([d, 'optionalAccess', _2 => _2.items, 'optionalAccess', _3 => _3[0], 'optionalAccess', _4 => _4.volumeInfo, 'optionalAccess', _5 => _5.imageLinks, 'optionalAccess', _6 => _6.thumbnail]);
+        const items = _optionalChain([d, 'optionalAccess', _2 => _2.items]) || [];
+        let thumb = null;
+        for (const item of items) {
+          const links = _optionalChain([item, 'optionalAccess', _3 => _3.volumeInfo, 'optionalAccess', _4 => _4.imageLinks]);
+          if (_optionalChain([links, 'optionalAccess', _5 => _5.thumbnail]) || _optionalChain([links, 'optionalAccess', _6 => _6.smallThumbnail])) {
+            thumb = (links.thumbnail || links.smallThumbnail).replace('http:', 'https:');
+            break;
+          }
+        }
         if (thumb) {
-          // Use https and zoom=1 for better quality
-          setSrc(thumb.replace('http:', 'https:').replace('zoom=1', 'zoom=2'));
+          setSrc(thumb);
         } else {
-          // Fallback: Open Library
           return fetch(`https://openlibrary.org/search.json?q=${q}&limit=1&fields=cover_i`)
             .then(r => r.json())
             .then(d2 => {
@@ -274,7 +293,9 @@ function BookCard({ book, onToggleRead, onToggleWishlist, onDelete }) {
             , React.createElement('div', { onClick: openGoodreads, style: {fontSize:11,fontWeight:700,color:"#2c2c2c",lineHeight:1.2,cursor:"pointer",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}, title: book.title,}
               , book.title, " " , React.createElement('span', { style: {fontSize:8,color:"#9a9aaa",fontWeight:400},}, "↗")
             )
-
+            , !book.standalone && CAT_CHARACTER[book.cat] && (
+              React.createElement('div', { style: {fontSize:8,color:"#5a7bb5",fontWeight:600,marginTop:1},}, "👤 " , CAT_CHARACTER[book.cat])
+            )
           )
           , React.createElement('button', { onClick: ()=>onDelete(book.id), style: {flexShrink:0,background:"none",border:"none",color:"#c8c8d0",cursor:"pointer",fontSize:13,padding:"0 2px",lineHeight:1},
             onMouseEnter: e=>e.currentTarget.style.color="#b04040", onMouseLeave: e=>e.currentTarget.style.color="#c8c8d0",}, "×")
@@ -284,14 +305,14 @@ function BookCard({ book, onToggleRead, onToggleWishlist, onDelete }) {
           , book.genre&&React.createElement('span', { style: {fontSize:8,background:col.tag,color:col.accent,padding:"1px 5px",borderRadius:20,fontWeight:700,border:`1px solid ${col.border}`},}, book.genre)
           , book.standalone&&React.createElement('span', { style: {fontSize:8,background:"#e8f0fe",color:"#2a5bb5",padding:"1px 5px",borderRadius:20,fontWeight:700,border:"1px solid #b8cff0"},}, "📖")
           , book.nyt&&React.createElement('span', { style: {background:"#8b2e2e",color:"#fff",fontSize:8,padding:"1px 5px",borderRadius:20,fontWeight:800},}, "NYT")
-          , book.read&&React.createElement('span', { style: {background:"#28622a",color:"#fff",fontSize:8,padding:"1px 5px",borderRadius:20,fontWeight:700},}, "✓")
+          , book.read&&React.createElement('span', { style: {background:"#1a5a8a",color:"#fff",fontSize:8,padding:"1px 5px",borderRadius:20,fontWeight:700},}, "✓")
           , book.wishlist&&!book.read&&React.createElement('span', { style: {background:"#8a4a18",color:"#fff",fontSize:8,padding:"1px 5px",borderRadius:20,fontWeight:700},}, "♥")
         )
 
         , React.createElement(StarRating, { rating: book.rating,})
 
         , React.createElement('div', { style: {display:"flex",gap:4,marginTop:2},}
-          , React.createElement('button', { onClick: ()=>onToggleRead(book.id), style: {flex:1,padding:"3px 0",background:book.read?"#edf5ee":"none",border:`1px solid ${col.border}`,borderRadius:4,color:book.read?"#28622a":"#a0a0b0",cursor:"pointer",fontSize:9,fontWeight:600},}, book.read?"✓ Read":"Mark Read")
+          , React.createElement('button', { onClick: ()=>onToggleRead(book.id), style: {flex:1,padding:"3px 0",background:book.read?"#e8f0fc":"none",border:`1px solid ${col.border}`,borderRadius:4,color:book.read?"#1a5a8a":"#a0a0b0",cursor:"pointer",fontSize:9,fontWeight:600},}, book.read?"✓ Read":"Mark Read")
           , React.createElement('button', { onClick: ()=>onToggleWishlist(book.id), style: {flex:1,padding:"3px 0",background:book.wishlist?"#f5ede8":"none",border:`1px solid ${col.border}`,borderRadius:4,color:book.wishlist?"#8a4a18":"#a0a0b0",cursor:"pointer",fontSize:9,fontWeight:600},}, book.wishlist?"♥ List":"+ List")
         )
       )
@@ -423,7 +444,7 @@ Your response must start with { and end with }. Nothing before or after.`;
                 , React.createElement('button', { onClick: ()=>handleAdd(true), style: {flex:1,background:"#faf9f7",border:`1.5px solid ${col.accent}`,borderRadius:10,padding:"11px 0",color:col.accent,fontWeight:700,cursor:"pointer",fontSize:13},}, "♥ Wishlist" )
               )
             ):(
-              React.createElement('div', { style: {textAlign:"center",padding:"10px 0",color:"#28622a",fontWeight:700},}, "✓ Added!" )
+              React.createElement('div', { style: {textAlign:"center",padding:"10px 0",color:"#1a5a8a",fontWeight:700},}, "✓ Added!" )
             )
           )
         )
@@ -553,7 +574,7 @@ Return the complete list sorted by year ascending.`;
               , React.createElement('div', { style: {padding:"12px 0",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,flexWrap:"wrap"},}
                 , React.createElement('div', { style: {fontSize:13,color:"#4a4a5a"},}
                   , React.createElement('strong', null, results.length), " books found"
-                  , alreadyCount>0&&React.createElement('span', { style: {color:"#28622a",marginLeft:8},}, "· " , alreadyCount, " already in library"   )
+                  , alreadyCount>0&&React.createElement('span', { style: {color:"#1a5a8a",marginLeft:8},}, "· " , alreadyCount, " already in library"   )
                   , newCount>0&&React.createElement('span', { style: {color:"#1a4a6b",marginLeft:8},}, "· " , React.createElement('strong', null, newCount), " selected to add"   )
                 )
                 , React.createElement('div', { style: {display:"flex",gap:6},}
@@ -570,7 +591,7 @@ Return the complete list sorted by year ascending.`;
                   React.createElement('div', { key: i,
                     onClick: ()=>!alreadyHave&&toggleSelect(i),
                     style: {display:"flex",alignItems:"center",gap:10,padding:"9px 10px",marginBottom:4,borderRadius:10,border:`1px solid ${isSel?"#1a4a6b":alreadyHave?"#d0e8d0":"#eee8e0"}`,background:isSel?"#e8f0fe":alreadyHave?"#f0f8f0":"#fff",cursor:alreadyHave?"default":"pointer",opacity:alreadyHave?0.7:1,transition:"all .12s"},}
-                    , React.createElement('div', { style: {width:18,height:18,borderRadius:4,border:`2px solid ${alreadyHave?"#28622a":isSel?"#1a4a6b":"#ccc8c0"}`,background:alreadyHave?"#28622a":isSel?"#1a4a6b":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0},}
+                    , React.createElement('div', { style: {width:18,height:18,borderRadius:4,border:`2px solid ${alreadyHave?"#1a5a8a":isSel?"#1a4a6b":"#ccc8c0"}`,background:alreadyHave?"#1a5a8a":isSel?"#1a4a6b":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0},}
                       , (alreadyHave||isSel)&&React.createElement('span', { style: {color:"#fff",fontSize:11,lineHeight:1},}, "✓")
                     )
                     , React.createElement('div', { style: {flex:1,minWidth:0},}
@@ -800,6 +821,7 @@ function LibraryTab({ books, setBooks }) {
   const [showAdd,setShowAdd]=useState(false);
   const [showAddAuthor,setShowAddAuthor]=useState(false);
   const [selectedGenre,setSelectedGenre]=useState("all");
+  const [selectedType,setSelectedType]=useState("all"); // all | standalone | series
   const [selectedYear,setSelectedYear]=useState("all");
 
   const filtered=useMemo(()=>books.filter(b=>{
@@ -811,12 +833,14 @@ function LibraryTab({ books, setBooks }) {
     if(selectedAuthor!=="all"&&b.author!==selectedAuthor)return false;
     if(search){const q=search.toLowerCase();if(!b.title.toLowerCase().includes(q)&&!b.author.toLowerCase().includes(q)&&!b.tags.some(t=>t.toLowerCase().includes(q)))return false;}
     if(selectedGenre!=="all"&&b.genre!==selectedGenre)return false;
+    if(selectedType==="standalone"&&!b.standalone)return false;
+    if(selectedType==="series"&&b.standalone)return false;
     if(selectedYear!=="all"){
       const [from,to]=selectedYear.split("-").map(Number);
       if(b.year<from||b.year>to)return false;
     }
     return true;
-  }).sort((a,b)=>a.author.localeCompare(b.author)||a.year-b.year),[books,activeCat,activeFilter,selectedAuthor,search,selectedGenre,selectedYear]);
+  }).sort((a,b)=>a.author.localeCompare(b.author)||a.year-b.year),[books,activeCat,activeFilter,selectedAuthor,search,selectedGenre,selectedYear,selectedType]);
 
   const catCounts=useMemo(()=>Object.fromEntries(CATEGORIES.map(c=>[c.id,books.filter(b=>b.cat===c.id).length])),[books]);
   const toggleRead=id=>setBooks(bs=>bs.map(b=>b.id===id?{...b,read:!b.read}:b));
@@ -912,6 +936,12 @@ function LibraryTab({ books, setBooks }) {
           , React.createElement('option', { value: "all",}, "🎭 All Genres"  )
           , GENRES.map(g=>React.createElement('option', { key: g, value: g,}, g))
         )
+        , React.createElement('select', { value: selectedType, onChange: e=>setSelectedType(e.target.value),
+          style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#3a3a4a",fontSize:13,cursor:"pointer",outline:"none",boxShadow:"0 1px 3px rgba(0,0,0,.06)"},}
+          , React.createElement('option', { value: "all",}, "📚 All Types"  )
+          , React.createElement('option', { value: "standalone",}, "📖 Standalone" )
+          , React.createElement('option', { value: "series",}, "🔗 Series" )
+        )
         , React.createElement('select', { value: selectedYear, onChange: e=>setSelectedYear(e.target.value),
           style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#3a3a4a",fontSize:13,cursor:"pointer",outline:"none",boxShadow:"0 1px 3px rgba(0,0,0,.06)"},}
           , React.createElement('option', { value: "all",}, "📅 All Years"  )
@@ -999,7 +1029,7 @@ function AuthScreen({ onAuth }) {
         )
 
         , error && React.createElement('div', { style: {background:"#f5eeee",border:"1px solid #d4b8b5",borderRadius:10,padding:"10px 14px",color:"#7a3530",fontSize:12,marginBottom:16},}, error)
-        , message && React.createElement('div', { style: {background:"#eaf2ea",border:"1px solid #b0ccb0",borderRadius:10,padding:"10px 14px",color:"#28622a",fontSize:12,marginBottom:16},}, message)
+        , message && React.createElement('div', { style: {background:"#eaf2ea",border:"1px solid #b0ccb0",borderRadius:10,padding:"10px 14px",color:"#1a5a8a",fontSize:12,marginBottom:16},}, message)
 
         , React.createElement('div', { style: {display:"flex",flexDirection:"column",gap:10,marginBottom:16},}
           , React.createElement('input', { type: "email", value: email, onChange: e=>setEmail(e.target.value),
@@ -1068,8 +1098,8 @@ function ApiKeyBanner() {
         , React.createElement('span', { style: {fontSize:14},}, hasKey ? "🔑" : "⚠️")
         , hasKey ? (
           React.createElement(React.Fragment, null
-            , React.createElement('span', { style: {color:"#28622a", fontWeight:600},}, "API key set — AI features active"      )
-            , saved && React.createElement('span', { style: {color:"#28622a"},}, "✓ Saved!" )
+            , React.createElement('span', { style: {color:"#1a5a8a", fontWeight:600},}, "API key set — AI features active"      )
+            , saved && React.createElement('span', { style: {color:"#1a5a8a"},}, "✓ Saved!" )
             , React.createElement('button', { onClick: removeKey, style: {background:"none", border:"1px solid #b0ccb0", borderRadius:6, padding:"3px 10px", color:"#6a8a6a", cursor:"pointer", fontSize:11},}, "Remove key" )
           )
         ) : (
@@ -1232,7 +1262,7 @@ function App() {
             )
             , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"},}
               , React.createElement('button', { onClick: ()=>supabase.auth.signOut(), style: {background:"none",border:"1px solid #ccc8c0",borderRadius:8,padding:"5px 12px",color:"#9a9aaa",cursor:"pointer",fontSize:11},}, "Sign out" )
-              , [["📚",stats.total,"Total","#edeaf5","#342058"],["✓",stats.read,"Read","#eaf2ea","#28622a"],["♥",stats.wishlist,"Wishlist","#f2ebe6","#8a4a18"],["📰",stats.nyt,"NYT","#f2e8e8","#8b2e2e"]].map(([icon,val,label,bg,color])=>(
+              , [["📚",stats.total,"Total","#edeaf5","#342058"],["✓",stats.read,"Read","#eaf2ea","#1a5a8a"],["♥",stats.wishlist,"Wishlist","#f2ebe6","#8a4a18"],["📰",stats.nyt,"NYT","#f2e8e8","#8b2e2e"]].map(([icon,val,label,bg,color])=>(
                 React.createElement('div', { key: label, style: {background:bg,border:`1px solid ${color}30`,borderRadius:9,padding:"6px 12px",textAlign:"center",minWidth:52},}
                   , React.createElement('div', { style: {fontSize:12},}, icon), React.createElement('div', { style: {fontSize:16,fontWeight:800,color},}, val), React.createElement('div', { style: {fontSize:8,color:"#9a9aaa",textTransform:"uppercase",letterSpacing:1},}, label)
                 )
