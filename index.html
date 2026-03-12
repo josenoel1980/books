@@ -107,16 +107,60 @@ const CATEGORIES = [
   { id: "self_help",        label: "Self-Help",        emoji: "💡" },
 ];
 
-const CAT_CHARACTER = {
-  vince_flynn:      "Mitch Rapp",
-  kyle_mills:       "Mitch Rapp",
-  brad_thor:        "Scot Harvath",
-  mark_greaney:     "Gray Man",
-  jack_carr:        "James Reece",
-  michael_connelly: "Bosch / Haller",
-  harlan_coben:     "Myron Bolitar",
-  david_baldacci:   "Amos Decker",
-};
+
+
+// Known series character names — used to identify series from book tags
+const CHARACTER_NAMES = new Set([
+  // Vince Flynn / Kyle Mills
+  "Mitch Rapp",
+  // Brad Thor
+  "Scot Harvath",
+  // Mark Greaney
+  "Gray Man", "Court Gentry",
+  // Jack Carr
+  "James Reece",
+  // Michael Connelly - full and short forms as used in tags
+  "Harry Bosch", "Bosch", "Mickey Haller", "Renée Ballard", "Renee Ballard",
+  "Ballard", "Jack McEvoy", "Terry McCaleb", "Detective Stilwell",
+  // Harlan Coben
+  "Myron Bolitar", "Mickey Bolitar", "Wilde", "Win", "Detective Kierce", "Windsor Lockwood",
+  // David Baldacci
+  "Amos Decker", "Will Robie", "Atlee Pine", "Sean King", "John Puller",
+  "Camel Club", "Aloysius Archer", "Travis Devine", "Michelle Maxwell",
+  "Walter Nash",
+  // John Sandford
+  "Lucas Davenport", "Virgil Flowers", "Kidd",
+  // Spy/Espionage
+  "Gabriel Allon", "Cotton Malone", "Malone",
+  "Bernie Gunther", "George Smiley", "Smiley",
+  "Wyndham Banerjee",
+  // Indian authors
+  "Perveen Mistry", "Inspector Persis Wadia", "Vikram Rana",
+  // British/Other
+  "Hercule Poirot", "Miss Marple", "Jack Reacher",
+  "Inspector Morse", "Adam Dalgliesh",
+]);
+
+// Get series name from book tags
+function getSeriesName(book) {
+  if (book.standalone) return null;
+  const tags = book.tags || [];
+  // Find all character names in tags
+  const chars = tags.filter(t => CHARACTER_NAMES.has(t));
+  if (chars.length > 1) return chars.slice(0,2).join(' & '); // e.g. "Bosch & Ballard"
+  if (chars.length === 1) return chars[0];
+  // If first tag is not a generic word, use it as series name
+  const genericTags = new Set(['LAPD','CIA','FBI','Crime','Action','Thriller','Standalone',
+    'Legal','Mystery','Spy','Historical','Serial Killer','Cold Case','Political',
+    'Netflix','Drugs','Terrorism','Journalist','Military','Navy SEAL','Assassination',
+    'Corruption','Conspiracy','Washington','Russia','Pakistan','Israel','Middle East',
+    'NGO','Medical','Finance','Police','Detective','Psychological','Suspense',
+    'Heist','Prison','Insurance','Classic','Foreclosure','Hong Kong','Tech',
+    'Bioweapon','Sniper','Africa','India','Investment','Edgar Award','WWII','Noir',
+    'Black Market','Bangladesh','Bollywood']);
+  if (tags[0] && !genericTags.has(tags[0]) && tags[0] !== 'Standalone') return tags[0];
+  return null;
+}
 
 const CAT_COLORS = {
   vince_flynn:      { bg:"#f5eeee", border:"#d4b8b5", accent:"#7a3530", tag:"#e8d5d3", tagText:"#5c2420" },
@@ -293,8 +337,8 @@ function BookCard({ book, onToggleRead, onToggleWishlist, onDelete }) {
             , React.createElement('div', { onClick: openGoodreads, style: {fontSize:11,fontWeight:700,color:"#2c2c2c",lineHeight:1.2,cursor:"pointer",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}, title: book.title,}
               , book.title, " " , React.createElement('span', { style: {fontSize:8,color:"#9a9aaa",fontWeight:400},}, "↗")
             )
-            , !book.standalone && CAT_CHARACTER[book.cat] && (
-              React.createElement('div', { style: {fontSize:8,color:"#5a7bb5",fontWeight:600,marginTop:1},}, "👤 " , CAT_CHARACTER[book.cat])
+            , getSeriesName(book) && (
+              React.createElement('div', { style: {fontSize:8,color:"#5a7bb5",fontWeight:600,marginTop:1},}, "👤 " , getSeriesName(book))
             )
           )
           , React.createElement('button', { onClick: ()=>onDelete(book.id), style: {flexShrink:0,background:"none",border:"none",color:"#c8c8d0",cursor:"pointer",fontSize:13,padding:"0 2px",lineHeight:1},
