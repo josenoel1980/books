@@ -1212,20 +1212,30 @@ function App() {
   };
 
   // Load books on first mount
-  useEffect(()=>{ loadBaseBooks(); },[]);
-
-  // Check auth on mount + listen for changes
+  // Single mount effect: load books then check auth
   useEffect(()=>{
-    supabase.auth.getSession().then(async({data:{session}})=>{
-      const baseBooks = await loadBaseBooks();
-      if(_optionalChain([session, 'optionalAccess', _30 => _30.user])){
-        setUser(session.user);
-        await mergeUserStates(session.user.id, baseBooks);
+    (async()=>{
+      try {
+        const baseBooks = await loadBaseBooks();
+        let session = null;
+        try {
+          const result = await supabase.auth.getSession();
+          session = _optionalChain([result, 'optionalAccess', _30 => _30.data, 'optionalAccess', _31 => _31.session]);
+        } catch(authErr) {
+          console.error('getSession failed:', authErr);
+        }
+        if(_optionalChain([session, 'optionalAccess', _32 => _32.user])){
+          setUser(session.user);
+          await mergeUserStates(session.user.id, baseBooks);
+        }
+      } catch(e) {
+        console.error('Init error:', e);
+      } finally {
+        setAuthLoading(false);
       }
-      setAuthLoading(false);
-    });
+    })();
     const {data:{subscription}}=supabase.auth.onAuthStateChange(async(_,session)=>{
-      if(_optionalChain([session, 'optionalAccess', _31 => _31.user])){
+      if(_optionalChain([session, 'optionalAccess', _33 => _33.user])){
         setUser(session.user);
         const baseBooks = window._BASE_BOOKS||[];
         await mergeUserStates(session.user.id, baseBooks);
@@ -1241,18 +1251,18 @@ function App() {
     setSyncing(true);
     const books = baseBooks && baseBooks.length ? baseBooks : (window._BASE_BOOKS||[]);
     const saved=await loadStates(userId);
-    const extraBooks=Object.values(saved).filter(r=>_optionalChain([r, 'access', _32 => _32.extra_data, 'optionalAccess', _33 => _33.isExtra])).map(r=>r.extra_data.book).filter(Boolean);
+    const extraBooks=Object.values(saved).filter(r=>_optionalChain([r, 'access', _34 => _34.extra_data, 'optionalAccess', _35 => _35.isExtra])).map(r=>r.extra_data.book).filter(Boolean);
     const hiddenIds = new Set(JSON.parse(localStorage.getItem('hidden_books')||'[]'));
     const base=books
-      .filter(b=>!hiddenIds.has(String(b.id)) && !_optionalChain([saved, 'access', _34 => _34[String(b.id)], 'optionalAccess', _35 => _35.extra_data, 'optionalAccess', _36 => _36.hidden]))
+      .filter(b=>!hiddenIds.has(String(b.id)) && !_optionalChain([saved, 'access', _36 => _36[String(b.id)], 'optionalAccess', _37 => _37.extra_data, 'optionalAccess', _38 => _38.hidden]))
       .map(b=>({
         ...b,
-        read:_optionalChain([saved, 'access', _37 => _37[String(b.id)], 'optionalAccess', _38 => _38.read])||false,
-        wishlist:_optionalChain([saved, 'access', _39 => _39[String(b.id)], 'optionalAccess', _40 => _40.wishlist])||false,
-        rating:_optionalChain([saved, 'access', _41 => _41[String(b.id)], 'optionalAccess', _42 => _42.rating])||b.rating,
+        read:_optionalChain([saved, 'access', _39 => _39[String(b.id)], 'optionalAccess', _40 => _40.read])||false,
+        wishlist:_optionalChain([saved, 'access', _41 => _41[String(b.id)], 'optionalAccess', _42 => _42.wishlist])||false,
+        rating:_optionalChain([saved, 'access', _43 => _43[String(b.id)], 'optionalAccess', _44 => _44.rating])||b.rating,
       }));
     const titles=new Set(base.map(b=>b.title.toLowerCase()));
-    const newBooks=extraBooks.filter(b=>!titles.has(b.title.toLowerCase()) && !_optionalChain([saved, 'access', _43 => _43[String(b.id)], 'optionalAccess', _44 => _44.extra_data, 'optionalAccess', _45 => _45.hidden]));
+    const newBooks=extraBooks.filter(b=>!titles.has(b.title.toLowerCase()) && !_optionalChain([saved, 'access', _45 => _45[String(b.id)], 'optionalAccess', _46 => _46.extra_data, 'optionalAccess', _47 => _47.hidden]));
     setBooks([...newBooks,...base]);
     setSyncing(false);
   };
