@@ -1012,15 +1012,6 @@ function LibraryTab({ books, setBooks }) {
           , React.createElement('button', { onClick: ()=>setShowAddAuthor(true), style: {background:"#1a4a6b",border:"none",borderRadius:8,padding:"6px 12px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:12},}, "👤 Add Author"  )
           , React.createElement('button', { onClick: ()=>setShowAI(true), style: {background:"#7a3530",border:"none",borderRadius:8,padding:"6px 12px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:12},}, "✦ AI Discover"  )
         )
-        , React.createElement('div', { style: {display:"flex",gap:5,flexWrap:"wrap",alignItems:"center"},}
-          , React.createElement('button', { onClick: ()=>setActiveCat("all"), style: {padding:"3px 10px",borderRadius:20,border:`1.5px solid ${activeCat==="all"?"#7a3530":"#ccc8c0"}`,background:activeCat==="all"?"#ede0df":"#faf9f7",color:activeCat==="all"?"#7a3530":"#6a6a7a",cursor:"pointer",fontSize:10,fontWeight:600},}, "All (" , books.length, ")")
-          , CATEGORIES.map(c=>{const col=CAT_COLORS[c.id];const active=activeCat===c.id;return(
-            React.createElement('button', { key: c.id, onClick: ()=>setActiveCat(c.id), style: {padding:"3px 10px",borderRadius:20,border:`1.5px solid ${active?col.accent:"#ccc8c0"}`,background:active?col.bg:"#faf9f7",color:active?col.accent:"#6a6a7a",cursor:"pointer",fontSize:10,fontWeight:600},}
-              , c.emoji, " " , c.label, " (" , catCounts[c.id]||0, ")"
-            )
-          );})
-          , React.createElement('span', { style: {marginLeft:"auto",color:"#9a9aaa",fontSize:10},}, filtered.length, " books" )
-        )
         , React.createElement('div', { style: {display:"flex",gap:5,alignItems:"center",marginTop:5},}
           , [["all","All"],["read","Read"],["unread","Unread"],["wishlist","Wishlist"],["nyt","NYT Only"]].map(([f,l])=>(
             React.createElement('button', { key: f, onClick: ()=>setActiveFilter(f), style: {padding:"3px 10px",borderRadius:20,border:"1px solid #ccc8c0",background:activeFilter===f?"#e8e4dc":"#faf9f7",color:activeFilter===f?"#3a3a4a":"#9a9aaa",cursor:"pointer",fontSize:10,fontWeight:activeFilter===f?600:400},}, l)
