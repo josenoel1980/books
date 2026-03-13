@@ -960,55 +960,60 @@ function LibraryTab({ books, setBooks }) {
   },[filtered]);
 
   return(
-    React.createElement('div', { style: {maxWidth:1400,margin:"0 auto",padding:"16px 24px"},}
+    React.createElement('div', { style: {maxWidth:1400,margin:"0 auto"},}
       , showAI&&React.createElement(AIModal, { onClose: ()=>setShowAI(false), onAdd: addBook,})
       , showAdd&&React.createElement(AddBookModal, { onClose: ()=>setShowAdd(false), onAdd: addBook, existingBooks: books,})
       , showAddAuthor&&React.createElement(AddAuthorModal, { onClose: ()=>setShowAddAuthor(false), onAddAll: addAuthorBooks, existingBooks: books,})
-      , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",marginBottom:14},}
-        , React.createElement('input', { value: search, onChange: e=>setSearch(e.target.value), placeholder: "🔍  Search title, author or tag…"      ,
-          style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#2c2c3a",fontSize:13,outline:"none",width:240},})
-        , React.createElement(AuthorDropdown, { books: books, selectedAuthor: selectedAuthor, onChange: setSelectedAuthor,})
-        , React.createElement('select', { value: selectedGenre, onChange: e=>setSelectedGenre(e.target.value),
-          style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#3a3a4a",fontSize:13,cursor:"pointer",outline:"none",boxShadow:"0 1px 3px rgba(0,0,0,.06)"},}
-          , React.createElement('option', { value: "all",}, "🎭 All Genres"  )
-          , GENRES.map(g=>React.createElement('option', { key: g, value: g,}, g))
-        )
-        , React.createElement('select', { value: selectedType, onChange: e=>setSelectedType(e.target.value),
-          style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#3a3a4a",fontSize:13,cursor:"pointer",outline:"none",boxShadow:"0 1px 3px rgba(0,0,0,.06)"},}
-          , React.createElement('option', { value: "all",}, "📚 All Types"  )
-          , React.createElement('option', { value: "standalone",}, "📖 Standalone" )
-          , React.createElement('option', { value: "series",}, "🔗 Series" )
-        )
-        , React.createElement('select', { value: selectedYear, onChange: e=>setSelectedYear(e.target.value),
-          style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:10,padding:"9px 14px",color:"#3a3a4a",fontSize:13,cursor:"pointer",outline:"none",boxShadow:"0 1px 3px rgba(0,0,0,.06)"},}
-          , React.createElement('option', { value: "all",}, "📅 All Years"  )
-          , React.createElement('option', { value: "1800-1999",}, "Before 2000" )
-          , React.createElement('option', { value: "2000-2004",}, "2000 – 2004"  )
-          , React.createElement('option', { value: "2005-2009",}, "2005 – 2009"  )
-          , React.createElement('option', { value: "2010-2014",}, "2010 – 2014"  )
-          , React.createElement('option', { value: "2015-2019",}, "2015 – 2019"  )
-          , React.createElement('option', { value: "2020-2025",}, "2020 – 2025"  )
-        )
-        , React.createElement('div', { style: {marginLeft:"auto",display:"flex",gap:8},}
-          , React.createElement('button', { onClick: ()=>setShowAdd(true), style: {background:"#28502a",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13},}, "+ Add Book"  )
-          , React.createElement('button', { onClick: ()=>setShowAddAuthor(true), style: {background:"#1a4a6b",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13},}, "👤 Add Author"  )
-          , React.createElement('button', { onClick: ()=>setShowAI(true), style: {background:"#7a3530",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13},}, "✦ AI Discover"  )
-        )
-      )
-      , React.createElement('div', { style: {display:"flex",gap:6,flexWrap:"wrap",marginBottom:8},}
-        , React.createElement('button', { onClick: ()=>setActiveCat("all"), style: {padding:"5px 13px",borderRadius:20,border:`1.5px solid ${activeCat==="all"?"#7a3530":"#ccc8c0"}`,background:activeCat==="all"?"#ede0df":"#faf9f7",color:activeCat==="all"?"#7a3530":"#6a6a7a",cursor:"pointer",fontSize:11,fontWeight:600},}, "All (" , books.length, ")")
-        , CATEGORIES.map(c=>{const col=CAT_COLORS[c.id];const active=activeCat===c.id;return(
-          React.createElement('button', { key: c.id, onClick: ()=>setActiveCat(c.id), style: {padding:"5px 13px",borderRadius:20,border:`1.5px solid ${active?col.accent:"#ccc8c0"}`,background:active?col.bg:"#faf9f7",color:active?col.accent:"#6a6a7a",cursor:"pointer",fontSize:11,fontWeight:600},}
-            , c.emoji, " " , c.label, " (" , catCounts[c.id]||0, ")"
+
+      /* ── Sticky filter bar ── */
+      , React.createElement('div', { style: {position:"sticky",top:62,zIndex:90,background:"#f0ede8",borderBottom:"1px solid #d8d4cc",padding:"8px 16px",boxShadow:"0 2px 6px rgba(0,0,0,.05)"},}
+        , React.createElement('div', { style: {display:"flex",gap:6,flexWrap:"wrap",alignItems:"center",marginBottom:6},}
+          , React.createElement('input', { value: search, onChange: e=>setSearch(e.target.value), placeholder: "🔍  Search title, author or tag…"      ,
+            style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:8,padding:"6px 12px",color:"#2c2c3a",fontSize:12,outline:"none",flex:"1 1 160px",minWidth:120},})
+          , React.createElement(AuthorDropdown, { books: books, selectedAuthor: selectedAuthor, onChange: setSelectedAuthor,})
+          , React.createElement('select', { value: selectedGenre, onChange: e=>setSelectedGenre(e.target.value),
+            style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:8,padding:"6px 10px",color:"#3a3a4a",fontSize:12,cursor:"pointer",outline:"none"},}
+            , React.createElement('option', { value: "all",}, "🎭 All Genres"  )
+            , GENRES.map(g=>React.createElement('option', { key: g, value: g,}, g))
           )
-        );})
+          , React.createElement('select', { value: selectedType, onChange: e=>setSelectedType(e.target.value),
+            style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:8,padding:"6px 10px",color:"#3a3a4a",fontSize:12,cursor:"pointer",outline:"none"},}
+            , React.createElement('option', { value: "all",}, "📚 All Types"  )
+            , React.createElement('option', { value: "standalone",}, "📖 Standalone" )
+            , React.createElement('option', { value: "series",}, "🔗 Series" )
+          )
+          , React.createElement('select', { value: selectedYear, onChange: e=>setSelectedYear(e.target.value),
+            style: {background:"#faf9f7",border:"1px solid #ccc8c0",borderRadius:8,padding:"6px 10px",color:"#3a3a4a",fontSize:12,cursor:"pointer",outline:"none"},}
+            , React.createElement('option', { value: "all",}, "📅 All Years"  )
+            , React.createElement('option', { value: "1800-1999",}, "Before 2000" )
+            , React.createElement('option', { value: "2000-2004",}, "2000 – 2004"  )
+            , React.createElement('option', { value: "2005-2009",}, "2005 – 2009"  )
+            , React.createElement('option', { value: "2010-2014",}, "2010 – 2014"  )
+            , React.createElement('option', { value: "2015-2019",}, "2015 – 2019"  )
+            , React.createElement('option', { value: "2020-2025",}, "2020 – 2025"  )
+          )
+          , React.createElement('button', { onClick: ()=>setShowAdd(true), style: {background:"#28502a",border:"none",borderRadius:8,padding:"6px 12px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:12},}, "+ Add Book"  )
+          , React.createElement('button', { onClick: ()=>setShowAddAuthor(true), style: {background:"#1a4a6b",border:"none",borderRadius:8,padding:"6px 12px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:12},}, "👤 Add Author"  )
+          , React.createElement('button', { onClick: ()=>setShowAI(true), style: {background:"#7a3530",border:"none",borderRadius:8,padding:"6px 12px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:12},}, "✦ AI Discover"  )
+        )
+        , React.createElement('div', { style: {display:"flex",gap:5,flexWrap:"wrap",alignItems:"center"},}
+          , React.createElement('button', { onClick: ()=>setActiveCat("all"), style: {padding:"3px 10px",borderRadius:20,border:`1.5px solid ${activeCat==="all"?"#7a3530":"#ccc8c0"}`,background:activeCat==="all"?"#ede0df":"#faf9f7",color:activeCat==="all"?"#7a3530":"#6a6a7a",cursor:"pointer",fontSize:10,fontWeight:600},}, "All (" , books.length, ")")
+          , CATEGORIES.map(c=>{const col=CAT_COLORS[c.id];const active=activeCat===c.id;return(
+            React.createElement('button', { key: c.id, onClick: ()=>setActiveCat(c.id), style: {padding:"3px 10px",borderRadius:20,border:`1.5px solid ${active?col.accent:"#ccc8c0"}`,background:active?col.bg:"#faf9f7",color:active?col.accent:"#6a6a7a",cursor:"pointer",fontSize:10,fontWeight:600},}
+              , c.emoji, " " , c.label, " (" , catCounts[c.id]||0, ")"
+            )
+          );})
+          , React.createElement('span', { style: {marginLeft:"auto",color:"#9a9aaa",fontSize:10},}, filtered.length, " books" )
+        )
+        , React.createElement('div', { style: {display:"flex",gap:5,alignItems:"center",marginTop:5},}
+          , [["all","All"],["read","Read"],["unread","Unread"],["wishlist","Wishlist"],["nyt","NYT Only"]].map(([f,l])=>(
+            React.createElement('button', { key: f, onClick: ()=>setActiveFilter(f), style: {padding:"3px 10px",borderRadius:20,border:"1px solid #ccc8c0",background:activeFilter===f?"#e8e4dc":"#faf9f7",color:activeFilter===f?"#3a3a4a":"#9a9aaa",cursor:"pointer",fontSize:10,fontWeight:activeFilter===f?600:400},}, l)
+          ))
+        )
       )
-      , React.createElement('div', { style: {display:"flex",gap:6,alignItems:"center",marginBottom:22},}
-        , [["all","All"],["read","Read"],["unread","Unread"],["wishlist","Wishlist"],["nyt","NYT Only"]].map(([f,l])=>(
-          React.createElement('button', { key: f, onClick: ()=>setActiveFilter(f), style: {padding:"4px 12px",borderRadius:20,border:"1px solid #ccc8c0",background:activeFilter===f?"#e8e4dc":"#faf9f7",color:activeFilter===f?"#3a3a4a":"#9a9aaa",cursor:"pointer",fontSize:11,fontWeight:activeFilter===f?600:400},}, l)
-        ))
-        , React.createElement('span', { style: {marginLeft:"auto",color:"#9a9aaa",fontSize:11},}, filtered.length, " books" , selectedGenre!=="all"?" · "+selectedGenre:"", selectedYear!=="all"?" · "+selectedYear:"", " · sorted by author → year"      )
-      )
+
+      /* ── Book list ── */
+      , React.createElement('div', { style: {padding:"12px 16px"},}
       , filtered.length===0?(
         React.createElement('div', { style: {textAlign:"center",padding:60,color:"#9a9aaa"},}, React.createElement('div', { style: {fontSize:40},}, "📭"), React.createElement('div', { style: {marginTop:10,fontSize:14},}, "No books match."  ))
       ):(
@@ -1022,6 +1027,7 @@ function LibraryTab({ books, setBooks }) {
           );
         })
       )
+      )/* end book list */
     )
   );
 }
@@ -1336,27 +1342,27 @@ function App() {
   return(
     React.createElement('div', { style: {minHeight:"100vh",background:"#f0ede8",color:"#2c2c3a"},}
       , React.createElement(ApiKeyBanner, null)
-      , React.createElement('div', { style: {background:"#f5f2ee",borderBottom:"1px solid #d8d4cc",padding:"18px 24px 0",boxShadow:"0 1px 4px rgba(0,0,0,.06)",position:"sticky",top:0,zIndex:100},}
+      , React.createElement('div', { style: {background:"#f5f2ee",borderBottom:"1px solid #d8d4cc",padding:"8px 16px 0",boxShadow:"0 1px 4px rgba(0,0,0,.06)",position:"sticky",top:0,zIndex:100},}
         , React.createElement('div', { style: {maxWidth:1400,margin:"0 auto"},}
-          , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:14,marginBottom:14},}
-            , React.createElement('div', null
-              , React.createElement('div', { style: {fontSize:9,color:"#7a3530",letterSpacing:4,textTransform:"uppercase",fontFamily:"monospace",fontWeight:700,marginBottom:4},}, "◆ PERSONAL READING VAULT"   )
-              , React.createElement('h1', { style: {fontSize:22,fontWeight:900,margin:0,color:"#1e1e2a"},}, "My Book Library "   , syncing&&React.createElement('span', { style: {fontSize:10,color:"#9a9aaa",fontWeight:400,marginLeft:6},}, "⟳ syncing…" ))
-            )
-            , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"},}
-              , React.createElement('button', { onClick: ()=>supabase.auth.signOut(), style: {background:"none",border:"1px solid #ccc8c0",borderRadius:8,padding:"5px 12px",color:"#9a9aaa",cursor:"pointer",fontSize:11},}, "Sign out" )
-              , [["📚",stats.total,"Total","#edeaf5","#342058"],["✓",stats.read,"Read","#eaf2ea","#1a5a8a"],["♥",stats.wishlist,"Wishlist","#f2ebe6","#8a4a18"],["📰",stats.nyt,"NYT","#f2e8e8","#8b2e2e"]].map(([icon,val,label,bg,color])=>(
-                React.createElement('div', { key: label, style: {background:bg,border:`1px solid ${color}30`,borderRadius:9,padding:"6px 12px",textAlign:"center",minWidth:52},}
-                  , React.createElement('div', { style: {fontSize:12},}, icon), React.createElement('div', { style: {fontSize:16,fontWeight:800,color},}, val), React.createElement('div', { style: {fontSize:8,color:"#9a9aaa",textTransform:"uppercase",letterSpacing:1},}, label)
+          , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:6},}
+            , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:10},}
+              , React.createElement('h1', { style: {fontSize:15,fontWeight:900,margin:0,color:"#1e1e2a",whiteSpace:"nowrap"},}, "📚 My Library "   , syncing&&React.createElement('span', { style: {fontSize:9,color:"#9a9aaa",fontWeight:400},}, "⟳ syncing…" ))
+              , [["✓",stats.read,"Read","#eaf2ea","#1a5a8a"],["♥",stats.wishlist,"Wishlist","#f2ebe6","#8a4a18"],["📰",stats.nyt,"NYT","#f2e8e8","#8b2e2e"]].map(([icon,val,label,bg,color])=>(
+                React.createElement('div', { key: label, style: {background:bg,border:`1px solid ${color}30`,borderRadius:7,padding:"2px 8px",textAlign:"center",display:"flex",alignItems:"center",gap:4},}
+                  , React.createElement('span', { style: {fontSize:10},}, icon), React.createElement('span', { style: {fontSize:12,fontWeight:800,color},}, val), React.createElement('span', { style: {fontSize:8,color:"#9a9aaa",textTransform:"uppercase",letterSpacing:0.5},}, label)
                 )
               ))
+              , React.createElement('div', { style: {background:"#edeaf5",border:"1px solid #34205830",borderRadius:7,padding:"2px 8px",display:"flex",alignItems:"center",gap:4},}
+                , React.createElement('span', { style: {fontSize:12,fontWeight:800,color:"#342058"},}, stats.total), React.createElement('span', { style: {fontSize:8,color:"#9a9aaa",textTransform:"uppercase",letterSpacing:0.5},}, "Total")
+              )
             )
+            , React.createElement('button', { onClick: ()=>supabase.auth.signOut(), style: {background:"none",border:"1px solid #ccc8c0",borderRadius:7,padding:"3px 10px",color:"#9a9aaa",cursor:"pointer",fontSize:10,whiteSpace:"nowrap"},}, "Sign out" )
           )
           , React.createElement('div', { style: {display:"flex",gap:0},}
             , [{id:"library",label:"📖 My Library",count:books.length},{id:"recommendations",label:"✦ Recommendations",count:null}].map(tab=>(
-              React.createElement('button', { key: tab.id, onClick: ()=>setActiveTab(tab.id), style: {padding:"10px 22px",background:"none",border:"none",borderBottom:`3px solid ${activeTab===tab.id?"#7a3530":"transparent"}`,color:activeTab===tab.id?"#7a3530":"#9a9aaa",fontWeight:activeTab===tab.id?800:500,fontSize:13,cursor:"pointer",marginBottom:-1,display:"flex",alignItems:"center",gap:6},}
+              React.createElement('button', { key: tab.id, onClick: ()=>setActiveTab(tab.id), style: {padding:"6px 16px",background:"none",border:"none",borderBottom:`3px solid ${activeTab===tab.id?"#7a3530":"transparent"}`,color:activeTab===tab.id?"#7a3530":"#9a9aaa",fontWeight:activeTab===tab.id?800:500,fontSize:12,cursor:"pointer",marginBottom:-1,display:"flex",alignItems:"center",gap:5},}
                 , tab.label
-                , tab.count!==null&&React.createElement('span', { style: {background:activeTab===tab.id?"#ede0df":"#e8e4dc",color:activeTab===tab.id?"#7a3530":"#9a9aaa",fontSize:10,padding:"1px 7px",borderRadius:20,fontWeight:700},}, tab.count)
+                , tab.count!==null&&React.createElement('span', { style: {background:activeTab===tab.id?"#ede0df":"#e8e4dc",color:activeTab===tab.id?"#7a3530":"#9a9aaa",fontSize:9,padding:"1px 6px",borderRadius:20,fontWeight:700},}, tab.count)
               )
             ))
           )
