@@ -51,29 +51,52 @@ const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY, {
   }
 });
 
+// ── All DB calls use plain fetch to avoid DataCloneError on Safari ──
+function dbHeaders() {
+  return {
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + SUPA_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=minimal'
+  };
+}
+
 async function loadStates(userId) {
-  const { data, error } = await supabase.from('book_states').select('*').eq('user_id', userId);
-  if (error) { console.error('loadStates:', error); return {}; }
-  const map = {};
-  (data || []).forEach(r => { map[r.book_id] = r; });
-  return map;
+  try {
+    const resp = await fetch(
+      SUPA_URL + '/rest/v1/book_states?user_id=eq.' + userId,
+      { headers: dbHeaders() }
+    );
+    if (!resp.ok) return {};
+    const data = await resp.json();
+    const map = {};
+    (data || []).forEach(r => { map[r.book_id] = r; });
+    return map;
+  } catch(e) { console.error('loadStates:', e.message); return {}; }
 }
 
 async function saveState(userId, bookId, read, wishlist, rating, extraData) {
-  const { error } = await supabase.from('book_states').upsert({
-    user_id: userId,
-    book_id: String(bookId),
-    read: read || false,
-    wishlist: wishlist || false,
-    rating: rating || 0,
-    extra_data: extraData || null,
-    updated_at: new Date().toISOString()
-  }, { onConflict: 'user_id,book_id' });
-  if (error) console.error('saveState error:', error.message);
+  try {
+    await fetch(SUPA_URL + '/rest/v1/book_states', {
+      method: 'POST',
+      headers: { ...dbHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({
+        user_id: userId, book_id: String(bookId),
+        read: read || false, wishlist: wishlist || false,
+        rating: rating || 0, extra_data: extraData || null,
+        updated_at: new Date().toISOString()
+      })
+    });
+  } catch(e) { console.error('saveState error:', e.message); }
 }
 
 async function deleteState(userId, bookId) {
-  await supabase.from('book_states').delete().eq('user_id', userId).eq('book_id', String(bookId));
+  try {
+    await fetch(
+      SUPA_URL + '/rest/v1/book_states?user_id=eq.' + userId + '&book_id=eq.' + String(bookId),
+      { method: 'DELETE', headers: dbHeaders() }
+    );
+  } catch(e) { console.error('deleteState error:', e.message); }
 }
 
 // ── Claude API ──
@@ -906,20 +929,19 @@ function LibraryTab({ books, setBooks }) {
   const deleteBook=async(id)=>{
     const sid = String(id);
     setBooks(bs=>bs.filter(b=>String(b.id)!==sid));
-    const {error} = await supabase.from('books').delete().eq('id', sid);
-    if(error) console.error('Hard delete error:', error.message);
-    if(user) await supabase.from('book_states').delete().eq('book_id', sid);
+    try {
+      await fetch(SUPA_URL + '/rest/v1/books?id=eq.' + sid, { method:'DELETE', headers:dbHeaders() });
+      await fetch(SUPA_URL + '/rest/v1/book_states?book_id=eq.' + sid, { method:'DELETE', headers:dbHeaders() });
+    } catch(e) { console.error('Delete error:', e.message); }
   };
   const addBook=book=>{setBooks(bs=>[{...book,id:Date.now()+Math.random(),...(!book.read&&{read:false}),...(!book.wishlist&&{wishlist:false})},bs.filter(b=>b.title.toLowerCase()!==book.title.toLowerCase())].flat());setShowAI(false);setShowAdd(false);};
 
   // Add a full author's books — inserts into DB books table then merges into state
   const addAuthorBooks = async (newBooks) => {
     if(!newBooks||!newBooks.length) return;
-    // Filter out already-existing titles
     const existingTitles = new Set(books.map(b=>b.title.toLowerCase()));
     const toAdd = newBooks.filter(b=>!existingTitles.has(b.title.toLowerCase()));
     if(!toAdd.length){ setShowAddAuthor(false); return; }
-    // Assign IDs and defaults
     const base = Date.now();
     const prepared = toAdd.map((b,i)=>({
       ...b,
@@ -931,24 +953,18 @@ function LibraryTab({ books, setBooks }) {
       standalone: b.standalone||false,
       tags: b.tags||[],
     }));
-    // Insert into Supabase books table
     try {
       const rows = prepared.map(b=>({
-        id: b.id,
-        cat: b.cat,
-        genre: b.genre,
-        title: b.title,
-        author: b.author,
-        year: b.year,
-        rating: b.rating,
-        nyt: b.nyt,
-        tags: b.tags,
-        standalone: b.standalone,
+        id: b.id, cat: b.cat, genre: b.genre, title: b.title,
+        author: b.author, year: b.year, rating: b.rating,
+        nyt: b.nyt, tags: b.tags, standalone: b.standalone,
       }));
-      const {error} = await supabase.from('books').upsert(rows);
-      if(error) console.error('DB insert error:', error);
-    } catch(e){ console.error('addAuthorBooks DB error:', e); }
-    // Merge into local state
+      await fetch(SUPA_URL + '/rest/v1/books', {
+        method: 'POST',
+        headers: { ...dbHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify(rows)
+      });
+    } catch(e){ console.error('addAuthorBooks error:', e.message); }
     setBooks(bs=>[...prepared, ...bs]);
     setShowAddAuthor(false);
   };
@@ -1182,31 +1198,37 @@ function App() {
   const [booksLoading,setBooksLoading]=useState(true);
   const [loadError,setLoadError]=useState(null);
 
-  // ── Load base books — plain fetch to avoid Supabase client DataCloneError ──
-  const loadBaseBooks = async () => {
+  // ── Load base books — plain fetch (avoids Supabase client DataCloneError on Safari) ──
+  const loadBaseBooks = async (attempt=1) => {
     setBooksLoading(true);
     setLoadError(null);
-    window._BASE_BOOKS = window._BASE_BOOKS || [];
     try {
-      const resp = await fetch(
-        `${SUPA_URL}/rest/v1/books?order=id`,
-        { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` } }
-      );
+      const url = SUPA_URL + '/rest/v1/books?order=id&limit=10000';
+      const resp = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': 'Bearer ' + SUPA_KEY,
+          'Content-Type': 'application/json'
+        }
+      });
       if (!resp.ok) {
         const txt = await resp.text().catch(()=>'');
-        throw new Error(`HTTP ${resp.status}: ${txt || resp.statusText}`);
+        throw new Error('HTTP ' + resp.status + ': ' + (txt || resp.statusText));
       }
       const data = await resp.json();
-      if (!data || data.length === 0) {
-        console.warn('Books table returned 0 rows — RLS may be blocking anon select. Run fix_rls.sql in Supabase.');
-      }
+      if (!data || data.length === 0) console.warn('Books table empty — run books_insert.sql');
       window._BASE_BOOKS = data || [];
-      setBooks((data||[]).map(b=>({...b, tags: Array.isArray(b.tags)?b.tags:(b.tags||[]), read:false, wishlist:false})));
+      setBooks((data||[]).map(b=>({...b, tags:Array.isArray(b.tags)?b.tags:(b.tags||[]), read:false, wishlist:false})));
       setBooksLoading(false);
       return window._BASE_BOOKS;
     } catch(e) {
       const msg = _optionalChain([e, 'optionalAccess', _23 => _23.message]) || String(e);
-      console.error('Failed to load books:', msg);
+      console.error('Load attempt ' + attempt + ' failed:', msg);
+      if (attempt < 3) {
+        await new Promise(r => setTimeout(r, 1500 * attempt));
+        return loadBaseBooks(attempt + 1);
+      }
       setLoadError(msg);
       window._BASE_BOOKS = [];
       setBooksLoading(false);
