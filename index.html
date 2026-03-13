@@ -52,20 +52,33 @@ const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY, {
 });
 
 // ── All DB calls use plain fetch to avoid DataCloneError on Safari ──
-function dbHeaders() {
+function dbHeaders(token) {
   return {
     'apikey': SUPA_KEY,
-    'Authorization': 'Bearer ' + SUPA_KEY,
+    'Authorization': 'Bearer ' + (token || SUPA_KEY),
     'Content-Type': 'application/json',
     'Prefer': 'return=minimal'
   };
+}
+
+// Get current session token from Supabase auth storage
+function getToken() {
+  try {
+    // Supabase stores session in localStorage under this key
+    const raw = localStorage.getItem('sb-' + SUPA_URL.split('//')[1].split('.')[0] + '-auth-token');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return _optionalChain([parsed, 'optionalAccess', _2 => _2.access_token]) || SUPA_KEY;
+    }
+  } catch(e) {}
+  return SUPA_KEY;
 }
 
 async function loadStates(userId) {
   try {
     const resp = await fetch(
       SUPA_URL + '/rest/v1/book_states?user_id=eq.' + userId,
-      { headers: dbHeaders() }
+      { headers: dbHeaders(getToken()) }
     );
     if (!resp.ok) return {};
     const data = await resp.json();
@@ -79,7 +92,7 @@ async function saveState(userId, bookId, read, wishlist, rating, extraData) {
   try {
     await fetch(SUPA_URL + '/rest/v1/book_states', {
       method: 'POST',
-      headers: { ...dbHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      headers: { ...dbHeaders(getToken()), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
       body: JSON.stringify({
         user_id: userId, book_id: String(bookId),
         read: read || false, wishlist: wishlist || false,
@@ -94,7 +107,7 @@ async function deleteState(userId, bookId) {
   try {
     await fetch(
       SUPA_URL + '/rest/v1/book_states?user_id=eq.' + userId + '&book_id=eq.' + String(bookId),
-      { method: 'DELETE', headers: dbHeaders() }
+      { method: 'DELETE', headers: dbHeaders(getToken()) }
     );
   } catch(e) { console.error('deleteState error:', e.message); }
 }
@@ -310,11 +323,11 @@ function BookCover({ title, author, col }) {
     fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=3&fields=items(volumeInfo/imageLinks,volumeInfo/title)`)
       .then(r => r.json())
       .then(d => {
-        const items = _optionalChain([d, 'optionalAccess', _2 => _2.items]) || [];
+        const items = _optionalChain([d, 'optionalAccess', _3 => _3.items]) || [];
         let thumb = null;
         for (const item of items) {
-          const links = _optionalChain([item, 'optionalAccess', _3 => _3.volumeInfo, 'optionalAccess', _4 => _4.imageLinks]);
-          if (_optionalChain([links, 'optionalAccess', _5 => _5.thumbnail]) || _optionalChain([links, 'optionalAccess', _6 => _6.smallThumbnail])) {
+          const links = _optionalChain([item, 'optionalAccess', _4 => _4.volumeInfo, 'optionalAccess', _5 => _5.imageLinks]);
+          if (_optionalChain([links, 'optionalAccess', _6 => _6.thumbnail]) || _optionalChain([links, 'optionalAccess', _7 => _7.smallThumbnail])) {
             thumb = (links.thumbnail || links.smallThumbnail).replace('http:', 'https:');
             break;
           }
@@ -325,7 +338,7 @@ function BookCover({ title, author, col }) {
           return fetch(`https://openlibrary.org/search.json?q=${q}&limit=1&fields=cover_i`)
             .then(r => r.json())
             .then(d2 => {
-              const coverId = _optionalChain([d2, 'optionalAccess', _7 => _7.docs, 'optionalAccess', _8 => _8[0], 'optionalAccess', _9 => _9.cover_i]);
+              const coverId = _optionalChain([d2, 'optionalAccess', _8 => _8.docs, 'optionalAccess', _9 => _9[0], 'optionalAccess', _10 => _10.cover_i]);
               if (coverId) setSrc(`https://covers.openlibrary.org/b/id/${coverId}-M.jpg`);
             });
         }
@@ -448,7 +461,7 @@ function AddBookModal({ onClose, onAdd, existingBooks }) {
   const [error,setError]=useState("");
   const [added,setAdded]=useState(false);
   const inputRef=useRef(null);
-  useEffect(()=>{setTimeout(()=>_optionalChain([inputRef, 'access', _10 => _10.current, 'optionalAccess', _11 => _11.focus, 'call', _12 => _12()]),80);},[]);
+  useEffect(()=>{setTimeout(()=>_optionalChain([inputRef, 'access', _11 => _11.current, 'optionalAccess', _12 => _12.focus, 'call', _13 => _13()]),80);},[]);
 
   const fetchDetails=async()=>{
     const title=titleInput.trim();
@@ -544,7 +557,7 @@ function AddAuthorModal({ onClose, onAddAll, existingBooks }) {
   const [adding, setAdding]     = useState(false);
   const [done, setDone]         = useState(false);
   const inputRef = useRef(null);
-  useEffect(()=>{ setTimeout(()=>_optionalChain([inputRef, 'access', _13 => _13.current, 'optionalAccess', _14 => _14.focus, 'call', _15 => _15()]),100); },[]);
+  useEffect(()=>{ setTimeout(()=>_optionalChain([inputRef, 'access', _14 => _14.current, 'optionalAccess', _15 => _15.focus, 'call', _16 => _16()]),100); },[]);
 
   const existingTitles = useMemo(()=>new Set(existingBooks.map(b=>b.title.toLowerCase())),[existingBooks]);
 
@@ -604,7 +617,7 @@ Return the complete list sorted by year ascending.`;
     setAdding(false);
   };
 
-  const newCount = results ? [...selected].filter(i=>!existingTitles.has(_optionalChain([results, 'access', _16 => _16[i], 'optionalAccess', _17 => _17.title, 'optionalAccess', _18 => _18.toLowerCase, 'call', _19 => _19()]))).length : 0;
+  const newCount = results ? [...selected].filter(i=>!existingTitles.has(_optionalChain([results, 'access', _17 => _17[i], 'optionalAccess', _18 => _18.title, 'optionalAccess', _19 => _19.toLowerCase, 'call', _20 => _20()]))).length : 0;
   const alreadyCount = results ? results.filter(b=>existingTitles.has(b.title.toLowerCase())).length : 0;
 
   return (
@@ -758,7 +771,7 @@ Start with [ end with ]. Nothing else.`;
               , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"start"},}
                 , React.createElement('div', { style: {flex:1},}
                   , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,marginBottom:3},}
-                    , React.createElement('span', { style: {fontSize:10,color:col.accent,fontWeight:700},}, _optionalChain([cat, 'optionalAccess', _20 => _20.emoji]), " " , _optionalChain([cat, 'optionalAccess', _21 => _21.label]))
+                    , React.createElement('span', { style: {fontSize:10,color:col.accent,fontWeight:700},}, _optionalChain([cat, 'optionalAccess', _21 => _21.emoji]), " " , _optionalChain([cat, 'optionalAccess', _22 => _22.label]))
                     , book.nyt&&React.createElement('span', { style: {background:"#8b2e2e",color:"#fff",fontSize:8,padding:"1px 5px",borderRadius:10,fontWeight:800},}, "NYT")
                     , React.createElement('span', { style: {background:col.tag,color:col.tagText,fontSize:9,padding:"1px 6px",borderRadius:10},}, book.year)
                   )
@@ -842,7 +855,7 @@ function RecommendationsTab({ onAddToLibrary }) {
       , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12,marginBottom:22},}
         , React.createElement('div', null
           , React.createElement('div', { style: {fontSize:9,color:"#6a4015",textTransform:"uppercase",letterSpacing:3,fontFamily:"monospace",fontWeight:700,marginBottom:6},}, "◆ CURATED FOR YOUR LIBRARY"    )
-          , React.createElement('div', { style: {fontSize:20,fontWeight:900,color:"#1e1e2a"},}, _optionalChain([data, 'optionalAccess', _22 => _22.headline])||"Personalised Reading Picks")
+          , React.createElement('div', { style: {fontSize:20,fontWeight:900,color:"#1e1e2a"},}, _optionalChain([data, 'optionalAccess', _23 => _23.headline])||"Personalised Reading Picks")
           , React.createElement('div', { style: {fontSize:12,color:"#9a9aaa",marginTop:3},}, "Based on your reading profile · Refreshes every 7 days"         )
         )
         , React.createElement('div', { style: {background:"#edeae4",border:"1px solid #d0ccc4",borderRadius:12,padding:"10px 16px",textAlign:"right"},}
@@ -930,8 +943,9 @@ function LibraryTab({ books, setBooks }) {
     const sid = String(id);
     setBooks(bs=>bs.filter(b=>String(b.id)!==sid));
     try {
-      await fetch(SUPA_URL + '/rest/v1/books?id=eq.' + sid, { method:'DELETE', headers:dbHeaders() });
-      await fetch(SUPA_URL + '/rest/v1/book_states?book_id=eq.' + sid, { method:'DELETE', headers:dbHeaders() });
+      const tok = getToken();
+      await fetch(SUPA_URL + '/rest/v1/books?id=eq.' + sid, { method:'DELETE', headers:dbHeaders(tok) });
+      await fetch(SUPA_URL + '/rest/v1/book_states?book_id=eq.' + sid, { method:'DELETE', headers:dbHeaders(tok) });
     } catch(e) { console.error('Delete error:', e.message); }
   };
   const addBook=book=>{setBooks(bs=>[{...book,id:Date.now()+Math.random(),...(!book.read&&{read:false}),...(!book.wishlist&&{wishlist:false})},bs.filter(b=>b.title.toLowerCase()!==book.title.toLowerCase())].flat());setShowAI(false);setShowAdd(false);};
@@ -961,7 +975,7 @@ function LibraryTab({ books, setBooks }) {
       }));
       await fetch(SUPA_URL + '/rest/v1/books', {
         method: 'POST',
-        headers: { ...dbHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+        headers: { ...dbHeaders(getToken()), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
         body: JSON.stringify(rows)
       });
     } catch(e){ console.error('addAuthorBooks error:', e.message); }
@@ -1214,7 +1228,7 @@ function App() {
       setBooksLoading(false);
       return window._BASE_BOOKS;
     } catch(e) {
-      const msg = _optionalChain([e, 'optionalAccess', _23 => _23.message]) || String(e);
+      const msg = _optionalChain([e, 'optionalAccess', _24 => _24.message]) || String(e);
       console.error('Load attempt ' + attempt + ' failed:', msg);
       if (attempt < 3) {
         await new Promise(r => setTimeout(r, 1500 * attempt));
@@ -1236,11 +1250,11 @@ function App() {
         let session = null;
         try {
           const result = await supabase.auth.getSession();
-          session = _optionalChain([result, 'optionalAccess', _24 => _24.data, 'optionalAccess', _25 => _25.session]);
+          session = _optionalChain([result, 'optionalAccess', _25 => _25.data, 'optionalAccess', _26 => _26.session]);
         } catch(authErr) {
           console.error('getSession failed:', authErr);
         }
-        if(_optionalChain([session, 'optionalAccess', _26 => _26.user])){
+        if(_optionalChain([session, 'optionalAccess', _27 => _27.user])){
           setUser(session.user);
           await mergeUserStates(session.user.id, baseBooks);
         }
@@ -1251,7 +1265,7 @@ function App() {
       }
     })();
     const {data:{subscription}}=supabase.auth.onAuthStateChange(async(_,session)=>{
-      if(_optionalChain([session, 'optionalAccess', _27 => _27.user])){
+      if(_optionalChain([session, 'optionalAccess', _28 => _28.user])){
         setUser(session.user);
         const baseBooks = window._BASE_BOOKS||[];
         await mergeUserStates(session.user.id, baseBooks);
@@ -1267,12 +1281,12 @@ function App() {
     setSyncing(true);
     const books = baseBooks && baseBooks.length ? baseBooks : (window._BASE_BOOKS||[]);
     const saved=await loadStates(userId);
-    const extraBooks=Object.values(saved).filter(r=>_optionalChain([r, 'access', _28 => _28.extra_data, 'optionalAccess', _29 => _29.isExtra])).map(r=>r.extra_data.book).filter(Boolean);
+    const extraBooks=Object.values(saved).filter(r=>_optionalChain([r, 'access', _29 => _29.extra_data, 'optionalAccess', _30 => _30.isExtra])).map(r=>r.extra_data.book).filter(Boolean);
     const base=books.map(b=>({
       ...b,
-      read:_optionalChain([saved, 'access', _30 => _30[String(b.id)], 'optionalAccess', _31 => _31.read])||false,
-      wishlist:_optionalChain([saved, 'access', _32 => _32[String(b.id)], 'optionalAccess', _33 => _33.wishlist])||false,
-      rating:_optionalChain([saved, 'access', _34 => _34[String(b.id)], 'optionalAccess', _35 => _35.rating])||b.rating,
+      read:_optionalChain([saved, 'access', _31 => _31[String(b.id)], 'optionalAccess', _32 => _32.read])||false,
+      wishlist:_optionalChain([saved, 'access', _33 => _33[String(b.id)], 'optionalAccess', _34 => _34.wishlist])||false,
+      rating:_optionalChain([saved, 'access', _35 => _35[String(b.id)], 'optionalAccess', _36 => _36.rating])||b.rating,
     }));
     const titles=new Set(base.map(b=>b.title.toLowerCase()));
     const newBooks=extraBooks.filter(b=>!titles.has(b.title.toLowerCase()));
